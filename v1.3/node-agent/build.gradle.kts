@@ -6,12 +6,10 @@ plugins {
 
 dependencies {
     implementation(project(":common-api"))
-    implementation(project(":common-events"))
 
+    implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")  // Look Here
+    implementation("com.fasterxml.jackson.core:jackson-databind")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
