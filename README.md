@@ -87,3 +87,15 @@ curl -X POST http://localhost:8081/api/metrics \
 {"id":"69c946fa1bccb148a6e54f5c","nodeId":"vps-01","metricType":"RAM","timestamp":"2026-03-29T10:20:00Z",
  "payload":{"totalMb":2048,"usedMb":1400,"usagePercent":68.36},"receiveAt":"2026-03-29T15:36:26.199371123Z"}
 ~~~
+
+
+### 4. Test metric ingestion 
+
+metrics/controller/MetricsMetricsControllerIntegrationTest.java
+
+~~~sh
+./gradlew :metrics-service:test --info
+
+BUILD SUCCESSFUL in 1s
+8 actionable tasks: 8 up-to-date
+~~~
