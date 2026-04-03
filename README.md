@@ -38,7 +38,7 @@ We will build this in this order:
 ~~~
 ## 1. Create the multi-module project
 
-Target structure
+### 1.1 Target structure
 
     infra-monitor/
     ├── build.gradle.kts
@@ -87,7 +87,7 @@ Plain Java library modules for:
 - common-events
 
 
-### Gradle multi-module
+### 1.2 Gradle multi-module
 
 Create the main build files in the root:
 
@@ -124,7 +124,7 @@ dependencies {
 }
 ~~~
 
-### Minimal app entry points
+### 1.3 Minimal app entry points
 
 Create one Spring Boot main class per runnable service.
 
@@ -133,25 +133,25 @@ Create one Spring Boot main class per runnable service.
 - dashboard-service/src/main/java/com/minte9/monitor/dashboard/DashboardServiceApplication.java
 - node-agent/src/main/java/com/minte9/monitor/agent/NodeAgentApplication.java
 
-### Minimal shared DTOs
+Minimal shared DTOs
 
 - common-api/src/main/java/com/minte9/monitor/common/api/MetricType.java
 - common-api/src/main/java/com/minte9/monitor/common/api/MetricIngestRequest.java
 
-### Minimal shared event contract
+Minimal shared event contract
 
 - common-events/src/main/java/com/minte9/monitor/common/events/MetricReceivedEvent.java
 
 For early development, string-based metricType is fine across event boundaries.
 
-### Minimal application.yml files
+Minimal application.yml files
 
 - metrics-service/src/main/resources/application.yml
 - alert-service/src/main/resources/application.yml
 - dashboard-service/src/main/resources/application.yml
 - node-agent/src/main/resources/application.yml
 
-### Test the build
+### 1.4 Test the build
 
 ~~~sh
 gradle wrapper
