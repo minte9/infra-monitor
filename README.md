@@ -349,7 +349,7 @@ At the end of Step 2, metrics-service can:
 ~~~sh
 #### STEP 3 - MongoDB
 ~~~
-### 3. Add persistence with MongoDB 
+## 3. Add persistence with MongoDB 
 
 
 Key idea: Dependency Injection (DI)
@@ -647,7 +647,7 @@ curl http://localhost:8081/api/metrics
 #### STEP 4 - Integration Test
 ~~~
 
-### 4. Metric integration test 
+## 4. Metric integration test 
 
 @SpringBootTest is the standard Boot annotation for integration-style tests,   
 and MockMvc is useful for server-side HTTP testing without needing a live servlet container.
