@@ -306,7 +306,6 @@ curl http://localhost:8081/actuator/health
 metrics-service/src/test/java/com/example/inframonitor/metrics/controller/MetricsControllerTest.java
 
 ~~~sh
-./gradlew :metrics-service:bootRun
 ./gradlew test
 
 BUILD SUCCESSFUL in 8s
