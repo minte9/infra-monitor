@@ -1,20 +1,6 @@
 # Home Infrastructure Monitor (VPS) - v1.5
 
-1. Create the multi-module project 
-2. Implement metrics-service 
-3. Add MongoDB 
-4. Test metric ingestion 
-5. Add event publishing with RabbitMQ 
-6. Implement alert-service 
-7. Implement dashboard-service 
-8. Add node-agent 
-9. Docker Compose everything 
-10. Prepare for VPS deployment
-
-
-## Project Structure, Metric Service
-
-Monitor:
+What we will monitor with metric-service:
 
 - VPS CPU
 - RAM
@@ -23,9 +9,9 @@ Monitor:
 - Microservices health
 - Trigger alerts when something goes wrong
 
-Event-driven, Reactive, Dockerized
+This is Event-driven, Reactive, Dockerized.
 
-### High-Level Architecture
+High-Level Architecture:
 
 ~~~sh
 Node Agent  →  metrics-service  →  RabbitMQ  →  alert-service
@@ -33,8 +19,7 @@ Node Agent  →  metrics-service  →  RabbitMQ  →  alert-service
                                    dashboard-service
 ~~~
 
-
-### We will build this in this order:
+We will build this in this order:
 
 1. Create the multi-module project
 2. Implement metrics-service
