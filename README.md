@@ -699,7 +699,7 @@ In src/test/java/com/minte9/monitor/
   - /metrics/controller/MetricsMetricsControllerIntegrationTest.java
 
 
-### Integration test agains MongoDB
+### 4.1 Integration test against MongoDB
 
 The cleanest simple path for your project is to run tests against the same MongoDB you use in Compose.
 
@@ -719,7 +719,7 @@ BUILD SUCCESSFUL in 1s
 8 actionable tasks: 8 up-to-date
 ~~~
 
-### Manual test flow
+### 4.2 Manual test flow
 
 Start the app, then run command.
 
@@ -790,7 +790,7 @@ We are only publishing in this step, alert-service will be consume in step 6.
         metrics.alert.queue
 
 
-### 1) Add RabbitMQ dependency
+### 5.1 Add RabbitMQ dependency
 
 Update metrics-service/build.gradle.kts
 
@@ -800,7 +800,7 @@ implementation("org.springframework.boot:spring-boot-starter-amqp")
 ~~~
 
 
-### 2) Create the event contract (common-events)
+### 5.2 Create the event contract (common-events)
 
 common-events/.../common/events/MetricReceivedEvent.java
 
@@ -818,7 +818,7 @@ public record MetricReceivedEvent(
 ~~~
 
 
-### 3) Add RabbitMQ config (metrics-service)
+### 5.3 Add RabbitMQ config (metrics-service)
 
 Spring AMQP will work with Queue, Exchange and Binding beans for broker declaration,  
 and RabbitTemplate can use JSON message converter for object payloads.  
@@ -859,7 +859,7 @@ public class RabbitMqConfig {
 ~~~
 
 
-### Beans (note)
+#### Beans (note)
 
 Exchange Bean  
 
@@ -896,7 +896,7 @@ What Spring actually does behind the scenes:
 - Injects them wherever needed
 
 
-### 4) Add an event publisher
+### 5.4 Add an event publisher
 
 metrics-service/.../metrics/messaging/MetricEventPublisher.java
 
@@ -930,7 +930,7 @@ public class MetricEventPublisher {
 ~~~
 
 
-### 5) Publish after saving to MongoDB
+### 5.5 Publish after saving to MongoDB
 
 Update your service so it saves first, then publishes.
 
@@ -970,7 +970,7 @@ public class MetricsIngestionService {
 ~~~
 
 
-### 6) Add RabbitMQ properties
+### 5.6 Add RabbitMQ properties
 
 Update metrics-service/src/main/resources/application.yml
 
@@ -992,7 +992,7 @@ management:
 ~~~
 
 
-### 7) Update Docker Compose
+### 5.7 Update Docker Compose
 
 Include RabbitMQ in docker-compose.yml
 
@@ -1026,7 +1026,7 @@ services:
 ~~~
 
 
-### 8) Add a quick publisher test
+### 5.8 Add a quick publisher test
 
 metrics-service/src/test/resources/application-test.yml
 
@@ -1050,7 +1050,7 @@ If RabbitMQ is not running, injestion will fail because
 publishing is now part of the request flow.  
 
 
-### 9) Manual test
+### 5.9 Manual test
 
 ~~~sh
 docker ps
@@ -1095,7 +1095,7 @@ curl http://localhost:8081/api/metrics/node/vps-01/latest/CPU
 ~~~
 
 
-### 10) Verify the message reached RabbitMQ
+### 5.10 Verify the message reached RabbitMQ
 
 Open the RabbitMQ management UI:
 
