@@ -190,7 +190,7 @@ The metrics-service will have:
 
 This keeps Step 2 practical and easy to test before adding MongoDB.
 
-### Package structure (TO DO)
+### 2.1 Package structure (TO DO)
 
 Inside metrics-service, create:
 
@@ -228,7 +228,7 @@ management:
 ~~~
 
 
-### Example request you can send now
+### 2.2 Example request you can send now
 
 ~~~sh
 ./gradlew build
@@ -273,7 +273,7 @@ curl -X POST http://localhost:8081/api/metrics \
   "payload":{"containerName":"rabbitmq","status":"UP","image":"rabbitmq:3-management"},"receiveAt":"2026-03-29T10:23:42.920761590Z"}
 ~~~
 
-### Test endpoints
+### 2.3 Test endpoints
 
 All metrics
 
@@ -305,7 +305,7 @@ curl http://localhost:8081/actuator/health
 {"status":"UP"}
 ~~~
 
-### Minimal integration test
+### 2.4 Minimal integration test
 
 metrics-service/src/test/java/com/example/inframonitor/metrics/controller/MetricsControllerTest.java
 
@@ -317,7 +317,7 @@ BUILD SUCCESSFUL in 8s
 ~~~
 
 
-### What you should have after this step
+### 2.5 What you should have after this step
 
 At the end of Step 2, metrics-service can:
 
@@ -387,7 +387,7 @@ Now, we will replace InMemoryMetricRepository with MongoMetricRepository.
 And we will NOT change controller and service, only the implementation.   
 
 
-## Add MongoDB dependency
+### 3.1 Add MongoDB dependency
 
 Replace in-memory repository with a Spring Data Mongo repository  
 and mapping MatricRecord to a Mongo document.
@@ -416,7 +416,7 @@ dependencies {
 }
 ~~~
 
-### Mondo document
+### 3.2 Mondo document
 
 Replace the old domain object with a Mongo document.
 
@@ -438,7 +438,7 @@ public record MetricRecord(
 ) {}
 ~~~
 
-### Repository
+### 3.3 Repository
 
 Replace the custom repository interface.  
 Delete these two files:  
@@ -461,7 +461,7 @@ public interface MetricMongoRepository extends MongoRepository<MetricRecord, Str
 With SpringData MongoDB, you usually write only the interface, not the implementation class.  
 Spring creates the implementation behind the scenes.  
 
-### Service
+### 3.4 Service
 
 Update the service to use Mongo.
 
@@ -476,7 +476,7 @@ public class MetricsIngestionService {
     }
 ~~~
 
-### MongoDB connection
+### 3.5 MongoDB connection
 
 Update metrics-service/src/main/resources/application.yml
 
@@ -503,7 +503,7 @@ This points metrics-service to a local MongoDB database named infra_monitor.
 
 
 
-## Docker Compose for metric-service + MongoDB
+### 3.5 Docker Compose for metric-service + MongoDB
 
 Create root docker-compose.yml
 
@@ -544,7 +544,7 @@ volumes:
 ~~~
 
 
-### Dockerfile
+### 3.6 Dockerfile
 
 This builds only the Boot jar for metrics-service, then runs it in a smaller JRE image.  
 metrics-service/Dockerfile
@@ -590,7 +590,7 @@ management:
         include: health,info
 ~~~
 
-### Test it
+### 3.7 Test it
 
 From the root:
 
