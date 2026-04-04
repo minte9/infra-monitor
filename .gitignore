@@ -1,8 +1,9 @@
 .gradle/
 build/
 out/
-bin/
 .idea/
-.vscode
 *.iml
 versions/
+gradle/
+gradlew
+gradle.bat
