@@ -1,27 +1,34 @@
+/**
+ * Metrics Ingestion Service
+ * -------------------------
+ * 
+ * Set id to null when creating a new record. 
+ * Mongo db will generate the identifier when saving the document. 
+ * This is the usual pattern with Spring Data MongoDB. 
+ */
+
 package com.minte9.monitor.metrics.service;
-
-import java.time.Instant;
-import java.util.UUID;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
 
 import com.minte9.monitor.common.api.MetricIngestRequest;
 import com.minte9.monitor.metrics.domain.MetricRecord;
-import com.minte9.monitor.metrics.repository.MetricRepository;
+import com.minte9.monitor.metrics.repository.MetricMongoRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 public class MetricsIngestionService {
     
-    private final MetricRepository metricRepository;
+    private final MetricMongoRepository metricMongoRepository;
 
-    public MetricsIngestionService(MetricRepository metricRepository) {
-        this.metricRepository = metricRepository;
+    public MetricsIngestionService(MetricMongoRepository metricMongoRepository) {
+        this.metricMongoRepository = metricMongoRepository;
     }
 
     public MetricRecord ingest(MetricIngestRequest request) {
         MetricRecord metricRecord = new MetricRecord(
-            UUID.randomUUID().toString(),
+            null,  // Look Here
             request.nodeId(),
             request.metricType(),
             request.timestamp(),
@@ -29,14 +36,14 @@ public class MetricsIngestionService {
             Instant.now()
         );
 
-        return metricRepository.save(metricRecord);
+        return metricMongoRepository.save(metricRecord);
     }
 
     public List<MetricRecord> findAll() {
-        return metricRepository.findAll();
+        return metricMongoRepository.findAll();
     }
 
     public List<MetricRecord> findByNodeId(String nodeId) {
-        return metricRepository.findByNodeId(nodeId);
+        return metricMongoRepository.findByNodeId(nodeId);
     }
 }

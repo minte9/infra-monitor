@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: metrics-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/infra_monitor}
+      auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION:true}
 
 management:
   endpoints:
