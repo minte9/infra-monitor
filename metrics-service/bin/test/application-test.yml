@@ -3,3 +3,8 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/infra_monitor_test
       auto-index-creation: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest

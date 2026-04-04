@@ -1,4 +1,4 @@
-# Infrastructure Monitor (VPS) - v1.0.4
+# Infrastructure Monitor (VPS) - v1.0.5
 
 ## 1. Project structure
 
@@ -909,11 +909,13 @@ curl http://localhost:8081/api/metrics
 
 
 
+
+
+## 4. Test metric injestion properly
+
 ~~~yml
 # ---- 4. Integration test ------------------------------------------------------
 ~~~
-
-## 4. Test metric injestion properly
 
 
 @SpringBootTest is the standard Boot annotation for integration-style tests,   
@@ -1048,3 +1050,430 @@ curl http://localhost:8081/api/metrics/node/vps-01/latest/CPU
  "payload":{"usagePercent":67.4,"systemLoad":1.82},"receiveAt":"2026-03-29T16:28:35.978Z"}
 ~~~
 
+
+
+
+
+## 5. Add event publishing with RabbitMQ 
+
+~~~yml
+# ---- 5. RabbitMQ messages -----------------------------------------------------
+~~~
+
+Spring Boot supports RabbitMQ through spring-boot-starter-amqp.    
+RabbitMQ config is driven by spring.rabbitmq.* properties.  
+
+Spring AMQP (framework) is a messaging protocol that lets different  
+systems communicate by sending messages through a broker  
+(instead of calling each other directly).
+
+Spring AMQP (Advanced Message Queuing Protocol).  
+A popular broker that uses AMQP is RabbitMQ.
+
+We are only publishing in this step, alert-service will be consume in step 6.
+
+    POST /api/metrics
+
+    metrics-service
+    ├─ save to Mongo
+    └─ publish MetricReceivedEvent
+              ↓
+        RabbitMQ exchange
+              ↓
+        metrics.alert.queue
+
+
+### 5.1 Add RabbitMQ dependency
+
+Update metrics-service/build.gradle.kts
+
+~~~kotlin
+// Add amqp starter
+implementation("org.springframework.boot:spring-boot-starter-amqp") 
+~~~
+
+
+### 5.2 Create the event contract (common-events)
+
+common-events/.../common/events/MetricReceivedEvent.java
+
+Keep it independent from Mongo annotations and REST DTOs. 
+
+~~~java
+public record MetricReceivedEvent(
+        String metricId,
+        String nodeId,
+        String metricType,
+        Instant timestamp,
+        Instant receiveAt, 
+        Map<String, Object> payload
+) {}
+~~~
+
+
+### 5.3 Add RabbitMQ config (metrics-service)
+
+Spring AMQP will work with Queue, Exchange and Binding beans for broker declaration,  
+and RabbitTemplate can use JSON message converter for object payloads.  
+
+/config/RabbitMqConfig.java
+
+~~~java
+package com.minte9.monitor.metrics.config;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+
+@Configuration
+public class RabbitMqConfig {
+    
+    public static final String METRICS_EXCHANGE = "metrics.exchange";
+    public static final String ALERT_QUEUE = "metrics.alert.queue";
+    public static final String METRIC_RECEIVED_ROUTING_KEY = "metric.received";
+
+    @Bean
+    public Queue alertQueue() {
+        return QueueBuilder.durable(ALERT_QUEUE).build();
+    }
+
+     @Bean
+    public DirectExchange metricsExchange() {
+        return new DirectExchange(METRICS_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Binding metricReceivedBinding(Queue alertQueue, DirectExchange metricsExchange) {
+        return BindingBuilder
+                .bind(alertQueue)
+                .to(metricsExchange)
+                .with(METRIC_RECEIVED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+}
+~~~
+
+
+#### Beans (note)
+
+Exchange Bean  
+
+~~~java
+// A bean is simply an object that is create, managed, and stored by the Spring container.  
+
+@Bean
+public DirectExchange metricsExchange() {
+    return new DirectExchange(METRICS_EXCANGE, true, false);
+}
+
+// Spring calls this method
+// Creates a DirectExchange object
+// Stores it as a bean named metricsExchange
+~~~
+
+Binding Beans (important)
+
+~~~java
+@Bean
+public Binding metricReceivedBinding(Queue alertQueue, DirectExchange metricsExchange)
+
+// Spring injects other beans automatically:  
+//  - alertQueue
+//  - metricsExchange
+~~~
+
+What Spring actually does behind the scenes:  
+
+- Scans @Configuration classes
+- Finds all @Bean methods
+- Executes them
+- Stores results in ApplicationContext
+- Injects them wherever needed
+
+
+### 5.4 Add an event publisher
+
+/messaging/MetricEventPublisher.java
+
+~~~java
+package com.minte9.monitor.metrics.messaging;
+import com.minte9.monitor.common.events.MetricReceivedEvent;
+import com.minte9.monitor.metrics.config.RabbitMqConfig;
+import org.springframework.amqp.core.MessageDeliveryMode;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MetricEventPublisher {
+
+    private final RabbitTemplate rabbitTemplate;
+
+    public MetricEventPublisher(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
+    
+    public void publish(MetricReceivedEvent event) {
+        rabbitTemplate.convertAndSend(
+            RabbitMqConfig.METRICS_EXCHANGE,
+            RabbitMqConfig.METRIC_RECEIVED_ROUTING_KEY,
+            event,
+            message -> {
+                message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+                return message;
+            }
+        );
+    }
+
+    // Durable queues alone do not makes messages persistent.
+    // The publisher messages also need to be marked persistent.
+    // RabbitMQ docs: 
+    //  - durability of queues/exchanges is separate from persistence of messages.
+}
+~~~
+
+/common-events/../MetricReceiveEvent.java
+
+~~~java
+package com.minte9.monitor.common.events;
+
+import java.time.Instant;
+import java.util.Map;
+
+public record MetricReceivedEvent(
+        String metricId,
+        String nodeId,
+        String metricType,
+        Instant timestamp,
+        Instant receiveAt, 
+        Map<String, Object> payload
+) {}
+~~~
+
+
+### 5.5 Publish after saving to MongoDB
+
+Update your service so it saves first, then publishes.
+
+metrics-service/.../metrics/service/MetricsIngestionService.java
+
+~~~java
+@Service
+public class MetricsIngestionService {
+    ...
+
+    public MetricRecord ingest(MetricIngestRequest request) {
+      MetricRecord metricRecord = new MetricRecord(
+          null,
+          request.nodeId(),
+          request.metricType(),
+          request.timestamp(),
+          request.payload(),
+          Instant.now()
+      );
+
+      MetricRecord saved = metricMongoRepository.save(metricRecord);
+
+      MetricReceivedEvent event = new MetricReceivedEvent(
+          saved.id(),
+          saved.nodeId(),
+          saved.metricType().name(),
+          saved.timestamp(),
+          saved.receivedAt(),
+          saved.payload()
+      );
+
+       metricEventPublisher.publish(event);
+
+      return saved;
+  }
+}
+~~~
+
+
+### 5.6 Add RabbitMQ properties
+
+Update metrics-service/src/main/resources/application.yml
+
+~~~yml
+server:
+  port: 8081
+
+spring:
+  application:
+    name: metrics-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/infra_monitor}
+      auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION:true}
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+~~~
+
+
+### 5.7 Update Docker Compose
+
+Include RabbitMQ in docker-compose.yml
+
+~~~yml
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: infra-monitor-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: infra-monitor-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      
+  metrics-service:
+    build:
+      context: .
+      dockerfile: metrics-service/Dockerfile
+    container_name: infra-monitor-metrics-service
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/infra_monitor
+      SPRING_DATA_MONGODB_AUTO_INDEX_CREATION: "true"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+~~~
+
+
+### 5.8 Add a quick publisher test
+
+metrics-service/src/test/resources/application-test.yml
+
+~~~yml
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/infra_monitor_test
+      auto-index-creation: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+~~~
+
+You can keep the existing integration test.  
+It will now also exercise the publish path implicitly.  
+
+If RabbitMQ is not running, injestion will fail because   
+publishing is now part of the request flow.  
+
+
+### 5.9 Manual test
+
+~~~sh
+docker ps
+docker container prune -f
+
+docker compose down
+./gradlew clean
+
+docker compose build
+docker compose up -d
+
+# debugging
+docker compose logs metrics-service
+./gradlew :metrics-service:compileJava --no-daemon
+
+docker compose build --no-cache
+docker compose up
+~~~
+
+Send a metric:
+
+~~~sh
+curl -X POST http://localhost:8081/api/metrics \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nodeId": "vps-01",
+    "metricType": "CPU",
+    "timestamp": "2026-03-29T12:00:00Z",
+    "payload": {
+      "usagePercent": 82.1,
+      "systemLoad": 2.31
+    }
+  }'
+
+{"id":"69ca3fe06ccae275d3cd9daa","nodeId":"vps-01","metricType":"CPU","timestamp":"2026-03-29T12:00:00Z",
+ "payload":{"usagePercent":82.1,"systemLoad":2.31},"receiveAt":"2026-03-30T09:18:24.323578743Z"}
+~~~
+
+Read it back from Mongo:
+
+~~~sh
+curl http://localhost:8081/api/metrics/node/vps-01/latest/CPU
+
+{"id":"69ca3fe06ccae275d3cd9daa","nodeId":"vps-01","metricType":"CPU","timestamp":"2026-03-29T12:00:00Z",
+ "payload":{"usagePercent":82.1,"systemLoad":2.31},"receiveAt":"2026-03-30T09:18:24.323Z"}
+~~~
+
+
+### 5.10 Verify the message reached RabbitMQ
+
+Open the RabbitMQ management UI:
+
+    http://localhost:15672
+    username: guest
+    password: guest
+
+    Your screenshot will shows:
+    Queues: 1
+
+    exchange: metrics.exchange
+    queue: metrics.alert.queue
+    binding key: metric.received
+
+If no consumer exists yet, the queue’s ready message count should increase after you post metrics.
+
+RabbitMQ routes published messages to bound queues through exchanges, so this is exactly the expected behavior before alert-service starts consuming.

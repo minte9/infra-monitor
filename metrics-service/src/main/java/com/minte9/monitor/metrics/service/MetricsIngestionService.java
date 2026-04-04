@@ -17,21 +17,26 @@ import org.springframework.stereotype.Service;
 
 import com.minte9.monitor.common.api.MetricIngestRequest;
 import com.minte9.monitor.common.api.MetricType;
+import com.minte9.monitor.common.events.MetricReceivedEvent;
 import com.minte9.monitor.metrics.domain.MetricRecord;
+import com.minte9.monitor.metrics.messaging.MetricEventPublisher;
 import com.minte9.monitor.metrics.repository.MetricMongoRepository;
 
 @Service
 public class MetricsIngestionService {
     
     private final MetricMongoRepository metricMongoRepository;
+    private final MetricEventPublisher metricEventPublisher; 
 
-    public MetricsIngestionService(MetricMongoRepository metricMongoRepository) {
+    public MetricsIngestionService(MetricMongoRepository metricMongoRepository,
+            MetricEventPublisher metricEventPublisher) {
         this.metricMongoRepository = metricMongoRepository;
+        this.metricEventPublisher = metricEventPublisher;
     }
 
     public MetricRecord ingest(MetricIngestRequest request) {
         MetricRecord metricRecord = new MetricRecord(
-            null,  // Look Here
+            null,
             request.nodeId(),
             request.metricType(),
             request.timestamp(),
@@ -39,7 +44,20 @@ public class MetricsIngestionService {
             Instant.now()
         );
 
-        return metricMongoRepository.save(metricRecord);
+        MetricRecord saved = metricMongoRepository.save(metricRecord);
+
+        MetricReceivedEvent event = new MetricReceivedEvent(
+            saved.id(),
+            saved.nodeId(),
+            saved.metricType().name(),
+            saved.timestamp(),
+            saved.receivedAt(),
+            saved.payload()
+        );
+
+        metricEventPublisher.publish(event);  // Look Here
+
+        return saved;
     }
 
     public List<MetricRecord> findAll() {

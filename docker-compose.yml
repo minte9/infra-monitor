@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   mongodb:
@@ -14,6 +13,18 @@ services:
       timeout: 5s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: infra-monitor-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      
   metrics-service:
     build:
       context: .
@@ -22,11 +33,17 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8081:8081"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/infra_monitor
       SPRING_DATA_MONGODB_AUTO_INDEX_CREATION: "true"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     restart: unless-stopped
 
 volumes:
