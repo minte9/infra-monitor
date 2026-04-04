@@ -9,14 +9,16 @@ The application will monitor:
 - Microservices health
 - Trigger alerts when something goes wrong
 
-## 1. Project structure / v1.0.1
+## 1. Project structure
+v1.0.1
 
 - 1.1 Overview
 - 1.2 Multi-module project
 - 1.3 Gradle multi-module
 - 1.4 Minimal application.yml files
 
-## 2. Metrics service / v1.0.2
+## 2. Metrics service
+v1.0.2
 
 - 2.1 Package structure
 - 2.2 Health endpoint config
@@ -24,7 +26,9 @@ The application will monitor:
 - 2.4 Test endpoints
 - 2.5 Minimal integration test
 
-## 3. MongoDB on metrics-service / v1.0.3
+## 3. MongoDB on metrics-service
+v1.0.3
+
 - 3.1 Dependency Injection (DI)
 - 3.2 MongoDB dependency
 - 3.3 Mondo document
@@ -35,13 +39,17 @@ The application will monitor:
 - 3.8 Dockerfile
 - 3.9 Test it
 
-## 4. Test metric injestion properly / v1.0.4
+## 4. Test metric injestion properly
+v1.0.4
+
 - 4.1 Make the service a bit more useful.  
 - 4.2 Exception handler
 - 4.3 Integration test agains MongoDB
 - 4.4 Manual test flow
 
-## 5. Event publishing with RabbitMQ / v1.0.5
+## 5. Event publishing with RabbitMQ
+v1.0.5
+
 - 5.1 RabbitMQ dependency
 - 5.2 Event contract (common-events) + Beans (note)
 - 5.4 Event publisher
