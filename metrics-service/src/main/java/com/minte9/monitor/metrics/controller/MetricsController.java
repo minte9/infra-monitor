@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.minte9.monitor.common.api.MetricIngestRequest;
 import com.minte9.monitor.metrics.api.MetricResponse;
+import com.minte9.monitor.common.api.MetricType;
 import com.minte9.monitor.metrics.domain.MetricRecord;
 import com.minte9.monitor.metrics.service.MetricsIngestionService;
 
@@ -42,6 +43,24 @@ public class MetricsController {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @GetMapping("/node/{nodeId}/latest")
+    public MetricResponse findLatestByNodeId(@PathVariable String nodeId) {
+        MetricRecord record = metricsIngestionService.findLatestByNodeId(nodeId)
+                .orElseThrow(() -> new MetricNotFoundException("No metrics found for node: " + nodeId));
+        return toResponse(record);
+    }
+
+    @GetMapping("/node/{nodeId}/latest/{metricType}")
+    public MetricResponse findLatestByNodeIdAndMetricType(@PathVariable String nodeId,
+                                                          @PathVariable MetricType metricType) {
+        MetricRecord record = metricsIngestionService
+                .findLatestByNodeIdAndMetricType(nodeId, metricType)
+                .orElseThrow(() -> new MetricNotFoundException(
+                        "No metrics found for node " + nodeId + " and type " + metricType));
+
+        return toResponse(record);
     }
 
     private MetricResponse toResponse(MetricRecord record) {

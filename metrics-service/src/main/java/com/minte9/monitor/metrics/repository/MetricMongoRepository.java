@@ -15,6 +15,7 @@ package com.minte9.monitor.metrics.repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -25,4 +26,7 @@ public interface MetricMongoRepository extends MongoRepository<MetricRecord, Str
     List<MetricRecord> findByNodeId(String nodeId);
     List<MetricRecord> findByNodeIdAndMetricType(String nodeId, MetricType metricType);
     List<MetricRecord> findByTimestampAfter(Instant timestamp);
+
+    Optional<MetricRecord> findFirstByNodeIdOrderByTimestampDesc(String nodeId);
+    Optional<MetricRecord> findFirstByNodeIdAndMetricTypeOrderByTimestampDesc(String nodeId, MetricType metricType);
 }

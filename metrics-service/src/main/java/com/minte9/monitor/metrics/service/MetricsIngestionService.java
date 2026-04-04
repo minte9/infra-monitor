@@ -9,13 +9,16 @@
 
 package com.minte9.monitor.metrics.service;
 
-import com.minte9.monitor.common.api.MetricIngestRequest;
-import com.minte9.monitor.metrics.domain.MetricRecord;
-import com.minte9.monitor.metrics.repository.MetricMongoRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.minte9.monitor.common.api.MetricIngestRequest;
+import com.minte9.monitor.common.api.MetricType;
+import com.minte9.monitor.metrics.domain.MetricRecord;
+import com.minte9.monitor.metrics.repository.MetricMongoRepository;
 
 @Service
 public class MetricsIngestionService {
@@ -45,5 +48,13 @@ public class MetricsIngestionService {
 
     public List<MetricRecord> findByNodeId(String nodeId) {
         return metricMongoRepository.findByNodeId(nodeId);
+    }
+
+    public Optional<MetricRecord> findLatestByNodeId(String nodeId) {
+        return metricMongoRepository.findFirstByNodeIdOrderByTimestampDesc(nodeId);
+    }
+
+    public Optional<MetricRecord> findLatestByNodeIdAndMetricType(String nodeId, MetricType metricType) {
+        return metricMongoRepository.findFirstByNodeIdAndMetricTypeOrderByTimestampDesc(nodeId, metricType);
     }
 }
