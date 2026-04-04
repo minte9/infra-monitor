@@ -244,7 +244,7 @@ public record MetricReceivedEvent(
 
 For early development, string-based metricType is fine across event boundaries.
 
-#### 1.4 Minimal application.yml files
+### 1.4 Minimal application.yml files
 
 - metrics-service/src/main/resources/application.yml
 - alert-service/src/main/resources/application.yml
@@ -268,7 +268,7 @@ management:
         include: health,info
 ~~~
 
-### Test the build
+### 1.5 Test the build
 
 ~~~sh
 gradle wrapper
