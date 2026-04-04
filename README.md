@@ -35,12 +35,11 @@ The application will monitor:
 - 3.8 Dockerfile
 - 3.9 Test it
 
-## 4. Test metric injestion properly * v1.0.4
+## 4. Test metric injestion properly / v1.0.4
 - 4.1 Make the service a bit more useful.  
 - 4.2 Exception handler
 - 4.3 Integration test agains MongoDB
 - 4.4 Manual test flow
-
 
 ## 5. Event publishing with RabbitMQ / v1.0.5
 - 5.1 RabbitMQ dependency
