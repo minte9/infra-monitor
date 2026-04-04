@@ -1,4 +1,4 @@
-# Home Infrastructure Monitor (VPS) - v1.0.1
+# Infrastructure Monitor (VPS) - v1.0.1
 
 ## 1. Project structure
 
