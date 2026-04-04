@@ -777,7 +777,7 @@ This points metrics-service to a local MongoDB database named infra_monitor.
 
 
 
-## 3.7 Docker Compose for metric-service + MongoDB
+### 3.7 Docker Compose for metric-service + MongoDB
 
 Create root docker-compose.yml
 
