@@ -9,14 +9,14 @@ The application will monitor:
 - Microservices health
 - Trigger alerts when something goes wrong
 
-## 1. Project structure / v1.0.1
+## 1. Project structure -> v1.0.1
 
 - 1.1 Overview
 - 1.2 Multi-module project
 - 1.3 Gradle multi-module
 - 1.4 Minimal application.yml files
 
-## 2. Metrics service / v1.0.2
+## 2. Metrics service -> v1.0.2
 
 - 2.1 Package structure
 - 2.2 Health endpoint config
@@ -24,7 +24,7 @@ The application will monitor:
 - 2.4 Test endpoints
 - 2.5 Minimal integration test
 
-## 3. MongoDB on metrics-service / v1.0.3
+## 3. MongoDB on metrics-service -> v1.0.3
 - Dependency Injection (DI)
 - MongoDB dependency
 - Mondo document
