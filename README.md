@@ -37,7 +37,7 @@ We will build this in this order:
 10. Prepare for VPS deployment
 
 
-### 1.2 Create the multi-module project
+### 1.2 Multi-module project
 
 Target structure:
 
@@ -285,7 +285,7 @@ BUILD SUCCESSFUL in 14s
 
 
 
-## 2. Implement metrics-service
+## 2. Metrics service
 
 ~~~yml 
 # ----- Metric Service --------------------------------------------------------------#
@@ -441,7 +441,7 @@ public class MetricsIngestionService {
 }
 ~~~
 
-### 2.2 Add a health endpoint config
+### 2.2 Health endpoint config
 
 This will have: GET /acuator/health  
 
@@ -602,7 +602,7 @@ BUILD SUCCESSFUL in 2s
 
 
 
-## 3. Add MongoDB to metrics-service
+## 3. MongoDB on metrics-service
 
 ~~~yml
 # ---- MongoDB ---------------------------------------------------------
@@ -661,7 +661,7 @@ Now, we will replace InMemoryMetricRepository with MongoMetricRepository.
 And we will NOT change controller and service, only the implementation.   
 
 
-### 3.2 Add MongoDB dependency
+### 3.2 MongoDB dependency
 
 Replace in-memory repository with a Spring Data Mongo repository  
 and mapping MatricRecord to a Mongo document.
@@ -735,7 +735,7 @@ public interface MetricMongoRepository extends MongoRepository<MetricRecord, Str
 With SpringData MongoDB, you usually write only the interface, not the implementation class.  
 Spring creates the implementation behind the scenes.  
 
-### 3.5 Service
+### 3.5 Metrics injestion service
 
 Update the service to use Mongo.
 
@@ -1054,7 +1054,7 @@ curl http://localhost:8081/api/metrics/node/vps-01/latest/CPU
 
 
 
-## 5. Add event publishing with RabbitMQ 
+## 5. Event publishing with RabbitMQ 
 
 ~~~yml
 # ---- 5. RabbitMQ messages -----------------------------------------------------
@@ -1083,7 +1083,7 @@ We are only publishing in this step, alert-service will be consume in step 6.
         metrics.alert.queue
 
 
-### 5.1 Add RabbitMQ dependency
+### 5.1 RabbitMQ dependency
 
 Update metrics-service/build.gradle.kts
 
@@ -1093,7 +1093,7 @@ implementation("org.springframework.boot:spring-boot-starter-amqp")
 ~~~
 
 
-### 5.2 Create the event contract (common-events)
+### 5.2 Event contract (common-events)
 
 common-events/.../common/events/MetricReceivedEvent.java
 
@@ -1111,7 +1111,7 @@ public record MetricReceivedEvent(
 ~~~
 
 
-### 5.3 Add RabbitMQ config (metrics-service)
+### 5.3 RabbitMQ config (metrics-service)
 
 Spring AMQP will work with Queue, Exchange and Binding beans for broker declaration,  
 and RabbitTemplate can use JSON message converter for object payloads.  
@@ -1200,7 +1200,7 @@ What Spring actually does behind the scenes:
 - Injects them wherever needed
 
 
-### 5.4 Add an event publisher
+### 5.4 Event publisher
 
 /messaging/MetricEventPublisher.java
 
@@ -1299,7 +1299,7 @@ public class MetricsIngestionService {
 ~~~
 
 
-### 5.6 Add RabbitMQ properties
+### 5.6 RabbitMQ properties
 
 Update metrics-service/src/main/resources/application.yml
 
@@ -1386,7 +1386,7 @@ volumes:
 ~~~
 
 
-### 5.8 Add a quick publisher test
+### 5.8 Quick publisher test
 
 metrics-service/src/test/resources/application-test.yml
 
