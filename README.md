@@ -12,10 +12,10 @@ The application will monitor:
 ## 1. Project structure
 v1.0.1
 
-1.1 Overview  
-1.2 Multi-module project  
-1.3 Gradle multi-module  
-1.4 Minimal application.yml files  
+- 1.1 Overview
+- 1.2 Multi-module project
+- 1.3 Gradle multi-module
+- 1.4 Minimal application.yml files
 
 ## 2. Metrics service
 v1.0.2
