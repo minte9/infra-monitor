@@ -88,7 +88,7 @@ We use Plain Java library modules for:
 
 ### 1.3 Gradle multi-module
 
-#### Create the main build files in the root:
+Create the main build files in the root:
 
 - infra-monitor/settings.gradle.kts  
 - infra-monitor/build.gradle.kts
@@ -134,7 +134,7 @@ subprojects {
 }
 ~~~
 
-#### Create the other build files:
+Create the other build files:
 
 - common-api/build.gradle.kts
 - common-events/build.gradle.kts
@@ -164,7 +164,7 @@ dependencies {
 }
 ~~~
 
-#### Minimal app entry points
+Minimal app entry points
 
 Create one Spring Boot main class per runnable service.
 
@@ -188,7 +188,7 @@ public class MetricsServiceApplication {
 }
 ~~~
 
-#### Minimal shared DTOs
+Minimal shared DTOs
 
 - common-api/src/main/java/com/minte9/monitor/common/api/MetricType.java
 - common-api/src/main/java/com/minte9/monitor/common/api/MetricIngestRequest.java
@@ -222,7 +222,7 @@ public record MetricIngestRequest(
 ) {}
 ~~~
 
-#### Minimal shared event contract
+Minimal shared event contract
 
 common-events/src/main/java/com/minte9/monitor/common/events/MetricReceivedEvent.java
 
@@ -285,7 +285,7 @@ BUILD SUCCESSFUL in 14s
 
 
 
-## 2 Implement metrics-service
+## 2. Implement metrics-service
 
 ~~~yml 
 # ----- Metric Service --------------------------------------------------------------#
