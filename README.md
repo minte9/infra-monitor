@@ -13,8 +13,8 @@ The application will monitor:
 v1.0.1
 
 - 1.1 Overview
-- 1.2 Multi-module project
-- 1.3 Gradle multi-module
+- 1.2 Multi-module project structure
+- 1.3 Gradle multi-module settings
 - 1.4 Minimal application.yml files
 
 ## 2. Metrics service
@@ -42,7 +42,7 @@ v1.0.3
 ## 4. Test metric injestion properly
 v1.0.4
 
-- 4.1 Make the service a bit more useful.  
+- 4.1 Make the service a bit more useful
 - 4.2 Exception handler
 - 4.3 Integration test agains MongoDB
 - 4.4 Manual test flow
