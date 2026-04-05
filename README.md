@@ -59,3 +59,25 @@ v1.0.5
 - 5.8 Quick publisher test
 - 5.9 Manual test
 - 5.10 Verify the message reached RabbitMQ
+
+## 6. Alert service
+v1.0.6
+
+- 6.1 What alert-service does
+- 6.2 Package structure
+- 6.3 Gradle build settings
+- 6.4 Main application class
+- 6.5 RabbitMQ config for alert-service
+- 6.6 Domain model (alert)
+- 6.7 API response DTO
+- 6.8 In-memory repository
+- 6.9 Alert evaluation service
+- 6.10 RabbitMQ listener
+- 6.11 REST controller to inspect alerts
+- 6.12 Service application.yml
+- 6.13 Add alert-service to docker-compose.yml
+- 6.14 Dockerfile for alert-service
+- 6.15 Manual test
+- 6.16 Send a metric that should trigger an alert
+- 6.17 Filter alerts
+- 6.18 What happens internally
