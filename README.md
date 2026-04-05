@@ -74,7 +74,7 @@ v1.0.6
 - 6.9 Alert evaluation service
 - 6.10 RabbitMQ listener
 - 6.11 REST controller to inspect alerts
-- 6.12 Service application.yml
-- 6.13 Add alert-service to docker-compose.yml
-- 6.14 Dockerfile for alert-service
+- 6.12 application.yml
+- 6.13 docker-compose.yml
+- 6.14 Dockerfile
 - 6.15 Manual test
