@@ -78,6 +78,3 @@ v1.0.6
 - 6.13 Add alert-service to docker-compose.yml
 - 6.14 Dockerfile for alert-service
 - 6.15 Manual test
-- 6.16 Send a metric that should trigger an alert
-- 6.17 Filter alerts
-- 6.18 What happens internally
