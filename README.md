@@ -39,7 +39,7 @@ v1.0.3
 - 3.8 Dockerfile
 - 3.9 Test it
 
-## 4. Test metric injestion properly
+## 4. Integration test
 v1.0.4
 
 - 4.1 Make the service a bit more useful
