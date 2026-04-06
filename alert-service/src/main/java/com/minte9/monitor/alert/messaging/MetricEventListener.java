@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import com.minte9.monitor.alert.config.RabbitMQConfig;
+import com.minte9.monitor.alert.config.RabbitMqConfig;
 import com.minte9.monitor.alert.domain.AlertRecord;
 import com.minte9.monitor.alert.service.AlertEvaluationService;
 import com.minte9.monitor.common.events.MetricReceivedEvent;
@@ -34,7 +34,7 @@ public class MetricEventListener {
         this.alertEvaluationService = alertEvaluationService;
     }
 
-    @RabbitListener(queues = RabbitMQConfig.ALERT_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.ALERT_QUEUE)
     public void onMetricReceived(MetricReceivedEvent event) {
         log.info("Received metric event: metricId={}, nodeId={}, metricType={}",
                     event.metricId(), event.nodeId(), event.metricType());

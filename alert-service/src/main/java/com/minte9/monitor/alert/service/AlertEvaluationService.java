@@ -8,7 +8,8 @@
  *  optional AlertRecord
  * 
  * If no alert condition matches, nothing is stored. 
- * If a rule matches, a new OPEN alert is created and saved.
+ * If a rule matches, a new OPEN alert is created, saved, and published
+ * as AlertTriggeredEvent for downstream consumers such as dashboard-service.
  */
 
 package com.minte9.monitor.alert.service;
@@ -16,7 +17,9 @@ package com.minte9.monitor.alert.service;
 import com.minte9.monitor.alert.domain.AlertRecord;
 import com.minte9.monitor.alert.domain.AlertSeverity;
 import com.minte9.monitor.alert.domain.AlertStatus;
+import com.minte9.monitor.alert.messaging.AlertEventPublisher;
 import com.minte9.monitor.alert.repository.AlertRepository;
+import com.minte9.monitor.common.events.AlertTriggeredEvent;
 import com.minte9.monitor.common.events.MetricReceivedEvent;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +33,14 @@ import java.util.UUID;
 public class AlertEvaluationService {
     
     private final AlertRepository alertRepository;
+    private final AlertEventPublisher alertEventPublisher;
 
-    public AlertEvaluationService(AlertRepository alertRepository) {
+    public AlertEvaluationService(
+            AlertRepository alertRepository,
+            AlertEventPublisher alertEventPublisher
+    ) {
         this.alertRepository = alertRepository;
+        this.alertEventPublisher = alertEventPublisher;
     }
 
     // Event evaluation
@@ -58,7 +66,21 @@ public class AlertEvaluationService {
                 event.payload()
         );
 
-        return Optional.of(alertRepository.save(alertRecord));
+        AlertRecord savedAlert = alertRepository.save(alertRecord);
+
+        AlertTriggeredEvent alertTriggeredEvent = new AlertTriggeredEvent(
+                savedAlert.id(),
+                savedAlert.nodeId(),
+                savedAlert.metricType(),
+                savedAlert.severity().name(),
+                savedAlert.message(),
+                savedAlert.triggeredAt(),
+                savedAlert.payload()
+        );
+
+        alertEventPublisher.publish(alertTriggeredEvent);
+
+        return Optional.of(savedAlert);
     }
 
     // Alert messages
@@ -140,9 +162,18 @@ public class AlertEvaluationService {
         Map<String, Object> payload = event.payload();
 
         return switch (metricType) {
-            case "CPU" -> percent(payload, "usagePercent") >= 90 ? AlertSeverity.CRITICAL : AlertSeverity.WARNING;
-            case "RAM" -> percent(payload, "usagePercent") >= 95 ? AlertSeverity.CRITICAL : AlertSeverity.WARNING;
-            case "DISK" -> percent(payload, "usagePercent") >= 95 ? AlertSeverity.CRITICAL : AlertSeverity.WARNING;
+            case "CPU" -> {
+                Double value = percent(payload, "usagePercent");
+                yield value != null && value >= 90 ? AlertSeverity.CRITICAL : AlertSeverity.WARNING;
+            }
+            case "RAM" -> {
+                Double value = percent(payload, "usagePercent");
+                yield value != null && value >= 95 ? AlertSeverity.CRITICAL : AlertSeverity.WARNING;
+            }
+            case "DISK" -> {
+                Double value = percent(payload, "usagePercent");
+                yield value != null && value >= 95 ? AlertSeverity.CRITICAL : AlertSeverity.WARNING;
+            }
             case "CONTAINER", "SERVICE" -> AlertSeverity.CRITICAL;
             default -> AlertSeverity.INFO;
         };

@@ -1,4 +1,4 @@
-# Infrastructure Monitor (VPS)
+# Infrastructure Monitor (VPS) - v1.0.7
 
 The application will monitor:
 
@@ -78,3 +78,23 @@ v1.0.6
 - 6.13 docker-compose.yml
 - 6.14 Dockerfile
 - 6.15 Manual test
+
+## 7. Dashboard service
+v1.0.7
+
+- 7.1 What dashboard-service will do
+- 7.2 Why projections matter
+- 7.3 Event contracts
+- 7.4 Package structure
+- 7.5 Gradle build settings
+- 7.6 Main application class
+- 7.7 RabbitMQ config
+- 7.8 Read model classes
+- 7.9 In-memory projection repository
+- 7.10 Projection update service
+- 7.11 RabbitMQ listeners
+- 7.12 REST controller
+- 7.13 Service application.yml
+- 7.15 Docker Compose
+- 7.16 Dockerfile
+- 7.17 Manual test flow
