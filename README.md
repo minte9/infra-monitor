@@ -1,4 +1,4 @@
-# Infrastructure Monitor (VPS) - v1.0.7
+# Infrastructure Monitor (VPS)
 
 The application will monitor:
 
