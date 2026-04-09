@@ -116,5 +116,5 @@ v1.0.8
 - 8.12 Node-agent application.yml
 - 8.13 Manual test flow
 - 8.14 Cleanup strategy
-- 8.15 Separate service
+- 8.15 Separate service for node-agent
 - 8.16 Run it directly (no Gradle)
