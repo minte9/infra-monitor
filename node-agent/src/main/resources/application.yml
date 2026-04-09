@@ -1,0 +1,26 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: node-agent
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+monitor:
+  agent:
+    node-id: vps-01
+    metrics-service-base-url: http://localhost:8081
+    interval-ms: 15000
+    docker-enabled: true
+    health-targets:
+      - service-name: metrics-service
+        url: http://localhost:8081/actuator/health
+      - service-name: alert-service
+        url: http://localhost:8082/actuator/health
+      - service-name: dashboard-service
+        url: http://localhost:8083/actuator/health

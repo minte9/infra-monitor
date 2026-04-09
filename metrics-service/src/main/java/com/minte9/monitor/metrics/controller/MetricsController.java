@@ -11,11 +11,14 @@ import com.minte9.monitor.metrics.service.MetricsIngestionService;
 
 import java.util.List;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/metrics")
 public class MetricsController {
     
+    private static final Logger log = LoggerFactory.getLogger(MetricsController.class);
     private final MetricsIngestionService metricsIngestionService;
 
     public MetricsController(MetricsIngestionService metricsIngestionService) {
@@ -25,6 +28,7 @@ public class MetricsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MetricResponse ingest(@Valid @RequestBody MetricIngestRequest request) {
+        log.info("Received metric request: {}", request);
         MetricRecord saved = metricsIngestionService.ingest(request);
         return toResponse(saved);
     }

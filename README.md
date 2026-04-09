@@ -98,3 +98,21 @@ v1.0.7
 - 7.15 Docker Compose
 - 7.16 Dockerfile
 - 7.17 Manual test flow
+
+## 8. Node agent
+v1.0.8
+
+- 8.1 What node-agent will send
+- 8.2 Shared metric type enum
+- 8.3 Gradle build
+- 8.4 Package structure
+- 8.5 Main application class
+- 8.6 Configuration properties
+- 8.7 HTTP client to send metrics
+- 8.8 System metrics collector
+- 8.9 Docker metrics collector
+- 8.10 Service health collector
+- 8.11 Scheduler that orchestrates collection
+- 8.12 Node-agent application.yml
+- 8.13 Manual test flow
+- 8.14 Cleanup strategy
