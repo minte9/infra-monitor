@@ -118,3 +118,4 @@ v1.0.8
 - 8.14 Cleanup strategy
 - 8.15 Separate service for node-agent
 - 8.16 Run it directly (no Gradle)
+- 8.17 Logs on VPS
