@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.minte9.monitor.dashboard.domain.AlertView;
 import com.minte9.monitor.dashboard.domain.MetricView;
 import com.minte9.monitor.dashboard.domain.NodeDashboardView;
+import com.minte9.monitor.dashboard.domain.ContainerStatusView;
+import com.minte9.monitor.dashboard.domain.ServiceHealthView;
 import com.minte9.monitor.dashboard.service.DashboardProjectionService;
 
 import java.util.List;
@@ -48,5 +50,17 @@ public class DashboardController {
     @GetMapping("/nodes/{nodeId}/alerts")
     public List<AlertView> findAlertsByNode(@PathVariable String nodeId) {
         return service.findAlertsByNode(nodeId);
+    }
+
+    // Containers & Services
+
+    @GetMapping("/nodes/{nodeId}/containers")
+    public List<ContainerStatusView> findContainersByNode(@PathVariable String nodeId) {
+        return service.findContainersByNode(nodeId);
+    }
+
+    @GetMapping("/nodes/{nodeId}/services")
+    public List<ServiceHealthView> findServicesByNode(@PathVariable String nodeId) {
+        return service.findServicesByNode(nodeId);
     }
 }

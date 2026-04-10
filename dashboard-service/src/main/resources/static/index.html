@@ -3,38 +3,142 @@
 <head>
     <title>Infra Monitor</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <link rel="icon" type="/images/png" href="icon.png">
+
     <style>
-        body {font-family: Arial; background: #0f172a; color: #e2e8f0; padding: 20px;}
-        .card {background: #1e293b; padding: 20px; border-radius: 10px; width: 300px;}
-        .title {font-size: 20px; margin-bottom: 10px;}
-        .metric {margin: 5px 0;}
-        .alert {padding: 10px; margin-top: 10px; border-radius: 6px; background: #334155;}
-        .alert-warning {background: #78350f;}
-        .alert-critical {background: #7f1d1d;}
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 12px;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 24px;
+        }
+
+        h2 {
+            margin: 16px 0 8px;
+            font-size: 16px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 8px;
+            min-width: 0;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .metric {
+            margin: 3px 0;
+            font-size: 12px;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .alert {
+            padding: 8px 10px;
+            margin-top: 6px;
+            border-radius: 6px;
+            background: #334155;
+            font-size: 12px;
+        }
+
+        .alert-warning { background: #78350f; }
+        .alert-critical { background: #7f1d1d; }
+
+        .status-up {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .status-down {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 
 <body>
 <div id="app">
     <h1>Infra Monitor</h1>
-    <div class="card">
-        <div class="title">Node: {{ nodeId }}</div>
-        <div class="metric">CPU: {{ cpu }}%</div>
-        <div class="metric">RAM: {{ ram }}%</div>
-        <div class="metric">Disk: {{ disk }}%</div>
+
+    <div class="section">
+        <div class="card-grid">
+            <div class="card">
+                <div class="title">Node: {{ nodeId }}</div>
+                <div class="metric">CPU: {{ cpu }}%</div>
+                <div class="metric">RAM: {{ ram }}%</div>
+                <div class="metric">Disk: {{ disk }}%</div>
+            </div>
+        </div>
     </div>
 
-    <h2 style="margin-top: 30px;">Alerts</h2>
-    <div v-if="alerts.length === 0">
-        No alerts
+    <div class="section">
+        <h2>Containers</h2>
+        <div v-if="containers.length === 0">No containers</div>
+        <div v-else class="card-grid">
+            <div v-for="container in containers" :key="container.containerName" class="card">
+                <div class="title">{{ container.containerName }}</div>
+                <div class="metric">
+                    Status:
+                    <span :class="statusClass(container.status)">{{ container.status }}</span>
+                </div>
+                <div class="metric">Image: {{ container.image }}</div>
+            </div>
+        </div>
     </div>
 
-    <div v-for="alert in alerts" 
-            :key="alert.id" class="alert" 
-            :class="alertClass(alert.severity)">
-        <strong>{{ alert.severity }}</strong> - {{ alert.message }}
+    <div class="section">
+        <h2>Services</h2>
+        <div v-if="services.length === 0">No services</div>
+        <div v-else class="card-grid">
+            <div v-for="service in services" :key="service.serviceName" class="card">
+                <div class="title">{{ service.serviceName }}</div>
+                <div class="metric">
+                    Status:
+                    <span :class="statusClass(service.status)">{{ service.status }}</span>
+                </div>
+                <div class="metric">HTTP: {{ service.httpStatus }}</div>
+                <div class="metric">URL: {{ service.url }}</div>
+            </div>
+        </div>
     </div>
 
+    <div class="section">
+        <h2>Alerts</h2>
+        <div v-if="alerts.length === 0">No alerts</div>
+        <div v-else>
+            <div v-for="alert in alerts" :key="alert.id" class="alert" :class="alertClass(alert.severity)">
+                <strong>{{ alert.severity }}</strong> - {{ alert.message }}
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -47,18 +151,24 @@ createApp({
             cpu: 0,
             ram: 0,
             disk: 0,
-            alerts: []
+            alerts: [],
+            containers: [],
+            services: []
         }
     },
 
     mounted() {
         this.loadMetrics();
         this.loadAlerts();
+        this.loadContainers();
+        this.loadServices();
 
         // near real-time dashboard (5s)
         setInterval(() => {
             this.loadMetrics();
             this.loadAlerts();
+            this.loadContainers();
+            this.loadServices();
         }, 5000);
     },
 
@@ -72,6 +182,14 @@ createApp({
                 this.cpu = data.CPU?.payload?.usagePercent ?? 0;
                 this.ram = data.RAM?.payload?.usagePercent ?? 0;
                 this.disk = data.DISK?.payload?.usagePercent ?? 0;
+
+                this.containerName = data.CONTAINER?.payload?.containerName ?? '-';
+                this.containerStatus = data.CONTAINER?.payload?.status ?? '-';
+                this.containerImage = data.CONTAINER?.payload?.image ?? '-';
+
+                this.serviceName = data.SERVICE?.payload?.serviceName ?? '-';
+                this.serviceStatus = data.SERVICE?.payload?.status ?? '-';
+                this.serviceUrl = data.SERVICE?.payload?.url ?? '-';
 
             } catch (e) {
                 console.error("Failed to load metrics", e);
@@ -90,12 +208,38 @@ createApp({
                 console.error("Failed to load alerts", e);
             }
         },
+        async loadContainers() {
+            try {
+                const res = await fetch(`/api/dashboard/nodes/${this.nodeId}/containers`);
+                const data = await res.json();
+                this.containers = data;
+            } catch (e) {
+                console.error("Failed to load containers", e);
+            }
+        },
+
+        async loadServices() {
+            try {
+                const res = await fetch(`/api/dashboard/nodes/${this.nodeId}/services`);
+                const data = await res.json();
+                this.services = data;
+            } catch (e) {
+                console.error("Failed to load services", e);
+            }
+        },
+
         alertClass(severity) {
             const s = (severity || '').trim().toUpperCase();
 
             if (s === 'WARNING') return 'alert-warning';
             if (s === 'CRITICAL') return 'alert-critical';
             return '';
+        },
+        statusClass(status) {
+            const s = (status || '').toLowerCase();
+
+            if (s === 'up' || s.startsWith('up')) return 'status-up';
+            return 'status-down';
         }
     }
 }).mount('#app');

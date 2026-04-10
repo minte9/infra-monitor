@@ -11,6 +11,8 @@ package com.minte9.monitor.dashboard.projection;
 import com.minte9.monitor.dashboard.domain.AlertView;
 import com.minte9.monitor.dashboard.domain.MetricView;
 import com.minte9.monitor.dashboard.domain.NodeDashboardView;
+import com.minte9.monitor.dashboard.domain.ContainerStatusView;
+import com.minte9.monitor.dashboard.domain.ServiceHealthView;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,6 +28,9 @@ public class DashboardProjectionRepository {
     private final Map<String, Map<String, MetricView>> latestMetricsByNode = new ConcurrentHashMap<>();
     private final Map<String, List<AlertView>> alertsByNode = new ConcurrentHashMap<>();
     private final Map<String, Instant> lastUpdateByNode = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, ContainerStatusView>> latestContainersByNode = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, ServiceHealthView>> latestServicesByNode = new ConcurrentHashMap<>();
+    
 
     public void updateMetric(String nodeId, MetricView metricView) {
         latestMetricsByNode
@@ -71,6 +76,40 @@ public class DashboardProjectionRepository {
 
     public List<AlertView> findAlertsByNode(String nodeId) {
         return alertsByNode.getOrDefault(nodeId, List.of());
+    }
+
+    // Container & Service
+
+    public void updateContainer(String nodeId, ContainerStatusView containerView) {
+        latestContainersByNode
+            .computeIfAbsent(nodeId, ignored -> new ConcurrentHashMap<>())
+            .put(containerView.containerName(), containerView);
+
+        lastUpdateByNode.put(nodeId, Instant.now());
+    }
+
+    public void updateService(String nodeId, ServiceHealthView serviceView) {
+        latestServicesByNode
+            .computeIfAbsent(nodeId, ignored -> new ConcurrentHashMap<>())
+            .put(serviceView.serviceName(), serviceView);
+
+        lastUpdateByNode.put(nodeId, Instant.now());
+    }
+
+    public List<ContainerStatusView> findContainersByNode(String nodeId) {
+        return latestContainersByNode.getOrDefault(nodeId, Map.of())
+                .values()
+                .stream()
+                .sorted(Comparator.comparing(ContainerStatusView::containerName))
+                .toList();
+    }
+    
+    public List<ServiceHealthView> findServicesByNode(String nodeId) {
+        return latestServicesByNode.getOrDefault(nodeId, Map.of())
+                .values()
+                .stream()
+                .sorted(Comparator.comparing(ServiceHealthView::serviceName))
+                .toList();
     }
 
 }
