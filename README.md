@@ -131,4 +131,6 @@ v1.0.9
 
 ![Screenshot](images/infra_monitor_ui.png)
 
+## Arhitecture
+
 ![Screenshot](images/infra_monitor_arhitecture.png)
