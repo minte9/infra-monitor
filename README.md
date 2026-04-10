@@ -9,6 +9,8 @@ The application will monitor:
 - Microservices health
 - Trigger alerts when something goes wrong
 
+![Screenshot](images/infra_monitor_arhitecture.png)
+
 ## 1. Project structure
 v1.0.1
 
@@ -130,4 +132,3 @@ v1.0.9
 ## Screeshots
 
 ![Screenshot](images/infra_monitor_ui.png)
-![Screenshot](images/infra_monitor_arhitecture.png)
