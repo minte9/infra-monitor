@@ -127,4 +127,6 @@ v1.0.9
 - 9.2 Port clarification
 - 9.3 Test the page
 
+## Screeshots
+
 ![Screenshot](images/infra_monitor_ui.png)
