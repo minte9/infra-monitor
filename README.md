@@ -119,3 +119,11 @@ v1.0.8
 - 8.15 Separate service for node-agent
 - 8.16 Run it directly (no Gradle)
 - 8.17 Logs on VPS
+
+## 9. Vue UI
+v1.0.9
+
+- 9.1 Static HTML page
+- 9.2 Port clarification
+- 9.3 Test the page
+

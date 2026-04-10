@@ -126,12 +126,25 @@ public class AlertEvaluationService {
     }
 
     private String containerAlertMessage(String nodeId, Map<String, Object> payload) {
-        Object status = payload.get("status");
+        Object rawStatus = payload.get("status");
         Object containerName = payload.getOrDefault("containerName", "unknown-container");
 
-        if (status != null && !"UP".equalsIgnoreCase(status.toString())) {
-            return "Container %s on node %s is %s".formatted(containerName, nodeId, status);
+        if (rawStatus == null) {
+            return "Container %s on node %s has unknown status".formatted(containerName, nodeId);
         }
+
+        String status = rawStatus.toString().trim().toLowerCase();
+
+        boolean isCritical =
+                status.startsWith("restarting") ||
+                status.startsWith("exited") ||
+                status.startsWith("dead") ||
+                status.contains("unhealthy");
+
+        if (isCritical) {
+            return "Container %s on node %s is %s".formatted(containerName, nodeId, rawStatus);
+        }
+
         return null;
     }
 
