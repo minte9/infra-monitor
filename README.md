@@ -130,3 +130,4 @@ v1.0.9
 ## Screeshots
 
 ![Screenshot](images/infra_monitor_ui.png)
+![Screenshot](images/infra_monitor_arhitecture.png)
