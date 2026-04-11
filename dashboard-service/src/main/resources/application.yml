@@ -16,3 +16,8 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  security:
+    username: ${APP_SECURITY_USERNAME:admin}
+    password: ${APP_SECURITY_PASSWORD:admin}

@@ -127,6 +127,18 @@ v1.0.9
 - 9.2 Port clarification
 - 9.3 Test the page
 
+## 10. Prepare for VPS deployment
+v1.0.10
+
+- 10.1 Spring Security to dashboard-service
+- 10.2 Add username/password to properties
+- 10.3 Create a properties class for the login config
+- 10.4 Create the Spring Security configuration
+- 10.5 Keep only dashboar public
+- 10.6 Rebuild and restart the project
+- 10.7 Clone project on the VPS
+
+
 ## Microservices Architecture
 
 ![Screenshot](images/infra_monitor_arhitecture.png)

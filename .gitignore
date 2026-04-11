@@ -4,7 +4,11 @@ out/
 .idea/
 .vscode/
 *.iml
+.env
 versions/
 gradle/
 gradlew
 gradlew.bat
+sh/
+.rsyncignore
+.dockerignore
