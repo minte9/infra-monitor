@@ -127,7 +127,7 @@ v1.0.9
 - 9.2 Port clarification
 - 9.3 Test the page
 
-## 10. Prepare for VPS deployment
+## 10. VPS deployment
 v1.0.10
 
 - 10.1 Spring Security to dashboard-service
