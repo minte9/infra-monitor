@@ -203,10 +203,136 @@ public class NodeAgentServiceApplication {
 
 This class maps node-agent settings from application.yml
 
+node-agent/src/../config/NodeAgentProperties.java
+
+~~~java
+/**
+ * This class maps node-agent settings from application.yml
+ * 
+ * Instead of reading raw strings manually from the environment, 
+ * Spring binds them into this type object. 
+ */
+
+package com.minte9.monitor.agent.config;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+
+@Validated
+@ConfigurationProperties(prefix = "monitor.agent")
+public class NodeAgentProperties {
+    
+    @NotBlank
+    private String nodeId;
+
+    @NotBlank
+    private String metricsServiceBaseUrl;
+
+    // Fixed delay in milliseconds between colletion cycles.
+    private long intervalMs = 15000;
+
+    // Whether Docker inspection is enabled.
+    private boolean dockerEnabled = true;
+
+    @Valid
+    @NotEmpty
+    private List<HealthTarget> healthTargets = new ArrayList<>();
+
+    // NodeId
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    // Metrics BaseUrl
+    public String getMetricsServiceBaseUrl() {
+        return metricsServiceBaseUrl;
+    }
+
+    public void setMetricsServiceBaseUrl(String metricsServiceBaseUrl) {
+        this.metricsServiceBaseUrl = metricsServiceBaseUrl;
+    }
+
+    // Interval
+    public long getIntervalMs() {
+        return intervalMs;
+    }
+
+    public void setIntervalMs(long intervalMs) {
+        this.intervalMs = intervalMs;
+    }
+
+    // Docker Enabled
+    public boolean isDockerEnabled() {
+        return dockerEnabled;
+    }
+
+    public void setDockerEnabled(boolean dockerEnabled) {
+        this.dockerEnabled = dockerEnabled;
+    }
+
+    // Health Targets
+    public List<HealthTarget> getHealthTargets() {
+        return healthTargets;
+    }
+
+    public void setHealthTargets(List<HealthTarget> healthTargets) {
+        this.healthTargets = healthTargets;
+    }
+
+    // Target class
+    public static class HealthTarget {
+        
+        @NotBlank
+        private String serviceName;
+
+        @NotBlank
+        private String url;
+
+        public String getServiceName() {
+            return serviceName;
+        }
+
+        public void setServiceName(String serviceName) {
+            this.serviceName = serviceName;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+    }
+}
+~~~
+
 node-agent/src/main/resources/application.yml
 
 ~~~yml
-...
+server:
+  port: 8084
+
+spring:
+  application:
+    name: node-agent
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
 monitor:
   agent:
@@ -221,36 +347,6 @@ monitor:
         url: http://localhost:8082/actuator/health
       - service-name: dashboard-service
         url: http://localhost:8083/actuator/health
-~~~
-
-node-agent/src/../config/NodeAgentProperties.java
-
-~~~java
-/** 
- * Instead of reading raw strings manually from the environment, 
- * Spring binds them into this type object. 
- */
-
-@Validated
-@ConfigurationProperties(prefix = "monitor.agent")
-public class NodeAgentProperties {
-
-    ...
-
-    @NotBlank
-    private String metricsServiceBaseUrl;
-
-    public String getMetricsServiceBaseUrl() {
-        return metricsServiceBaseUrl;
-    }
-
-    public void setMetricsServiceBaseUrl(String metricsServiceBaseUrl) {
-        this.metricsServiceBaseUrl = metricsServiceBaseUrl;
-    }
-
-    ...
-
-}
 ~~~
 
 Why use typed properties?
@@ -331,11 +427,23 @@ node-agent/src/../agent/collector/SystemMetricsCollector.java
  * format expected by metrics-service.
  */
 
+package com.minte9.monitor.agent.collector;
+
+import com.minte9.monitor.common.api.MetricIngestRequest;
+import com.minte9.monitor.common.api.MetricType;
+import org.springframework.stereotype.Component;
+
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class SystemMetricsCollector {
@@ -343,11 +451,16 @@ public class SystemMetricsCollector {
     private final SystemInfo systemInfo;
     private long[] previousCpuTicks;
 
+    // Constructor
     public SystemMetricsCollector() {
         this.systemInfo = new SystemInfo();
+
+        // CPU usage is not read from a single static number.  
+        // OSHI calculates it beween two snapshots of CPU ticks.  
         this.previousCpuTicks = systemInfo.getHardware().getProcessor().getSystemCpuLoadTicks();
     }
 
+    // Metrics collection (system)
     public List<MetricIngestRequest> collect(String nodeId) {
         List<MetricIngestRequest> metrics = new ArrayList<>();
         Instant now = Instant.now();
@@ -359,6 +472,7 @@ public class SystemMetricsCollector {
         return metrics;
     }
 
+    // CPU
     private MetricIngestRequest buildCpuMetric(String nodeId, Instant timestamp) {
             CentralProcessor processor = systemInfo.getHardware().getProcessor();
     
@@ -378,8 +492,74 @@ public class SystemMetricsCollector {
                     payload
             );
         }
+        
+        // RAM
+        private MetricIngestRequest buildRamMetric(String nodeId, Instant timestamp) {
+            GlobalMemory memory = systemInfo.getHardware().getMemory();
     
-        ...
+            long totalBytes = memory.getTotal();
+            long availableBytes = memory.getAvailable();
+            long usedBytes = totalBytes - availableBytes;
+    
+            double totalMb = bytesToMb(totalBytes);
+            double usedMb = bytesToMb(usedBytes);
+            double usagePercent = totalBytes == 0 ? 0.0 : ((double) usedBytes / totalBytes) * 100.0;
+    
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("totalMb", round(totalMb));
+            payload.put("usedMb", round(usedMb));
+            payload.put("usagePercent", round(usagePercent));
+    
+            return new MetricIngestRequest(
+                    nodeId,
+                    MetricType.RAM,
+                    timestamp,
+                    payload
+            );
+        }
+        
+        // Disk
+        private MetricIngestRequest buildDiskMetric(String nodeId, Instant timestamp) {
+            FileSystem fileSystem = systemInfo.getOperatingSystem().getFileSystem();
+    
+            long totalBytes = 0L;
+            long usableBytes = 0L;
+    
+            for (OSFileStore fileStore : fileSystem.getFileStores()) {
+                totalBytes += fileStore.getTotalSpace();
+                usableBytes += fileStore.getUsableSpace();
+            }
+    
+            long usedBytes = totalBytes - usableBytes;
+            double totalGb = bytesToGb(totalBytes);
+            double usedGb = bytesToGb(usedBytes);
+            double usagePercent = totalBytes == 0 ? 0.0 : ((double) usedBytes / totalBytes) * 100.0;
+    
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("totalGb", round(totalGb));
+            payload.put("usedGb", round(usedGb));
+            payload.put("usagePercent", round(usagePercent));
+    
+            return new MetricIngestRequest(
+                    nodeId,
+                    MetricType.DISK,
+                    timestamp,
+                    payload
+            );
+        }
+
+        // Utills
+        private double bytesToMb(long bytes) {
+            return bytes / 1024.0 / 1024.0;
+        }
+
+        private double bytesToGb(long bytes) {
+            return bytes / 1024.0 / 1024.0 / 1024.0;
+        }
+
+        private double round(double value) {
+            return Math.round(value * 100.0) / 100.0;
+        }
 }
 ~~~
 
@@ -413,11 +593,32 @@ node-agent/src/../agent/collector/DockerMetricsCollector.java
  *  rabbitmq||rabbitmq:3-management||Up 10 minutes 
  */
 
+package com.minte9.monitor.agent.collector;
+
+import com.minte9.monitor.common.api.MetricIngestRequest;
+import com.minte9.monitor.common.api.MetricType;
+import org.springframework.stereotype.Component;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class DockerMetricsCollector {
     
     private static final Logger log = LoggerFactory.getLogger(DockerMetricsCollector.class);
 
+    public DockerMetricsCollector() {
+    }
+
+    // Metrics collection (docker)
     public List<MetricIngestRequest> collect(String nodeId) {
         List<MetricIngestRequest> result = new ArrayList<>();
         Instant now = Instant.now();
@@ -430,8 +631,7 @@ public class DockerMetricsCollector {
         try {
             Process process = processBuilder.start();
 
-            try(BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
+            try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 
                 String line;
                 while((line = reader.readLine()) != null) {
@@ -498,23 +698,44 @@ node-agent/src/../agent/collector/ServiceHealthCollector.java
  * The goal is to emit a simple SERVICE metric for each known service. 
  */
 
+package com.minte9.monitor.agent.collector;
+
+import com.minte9.monitor.agent.config.NodeAgentProperties;
+import com.minte9.monitor.common.api.MetricIngestRequest;
+import com.minte9.monitor.common.api.MetricType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class ServiceHealthCollector {
-
+    
+    private final RestClient restClient;
+    private final NodeAgentProperties properties;
     private static final Logger log = LoggerFactory.getLogger(ServiceHealthCollector.class);
 
-    private final NodeAgentProperties properties;
-    private final RestClient restClient;
-
+    // Constructor
     public ServiceHealthCollector(NodeAgentProperties properties) {
         this.properties = properties;
         this.restClient = RestClient.builder().build();
     }
 
+    // Metrics collection (service)
     public List<MetricIngestRequest> collect(String nodeId) {
         List<MetricIngestRequest> metrics = new ArrayList<>();
         Instant now = Instant.now();
 
+        // Check every target (UP)
         for (NodeAgentProperties.HealthTarget target : properties.getHealthTargets()) {
             metrics.add(checkTarget(nodeId, now, target));
         }
@@ -522,8 +743,10 @@ public class ServiceHealthCollector {
         return metrics;
     }
 
-    private MetricIngestRequest checkTarget(String nodeId, Instant timestamp,
-                                            NodeAgentProperties.HealthTarget target) {
+    // Check target (UP)
+    private MetricIngestRequest checkTarget(
+            String nodeId, Instant timestamp, NodeAgentProperties.HealthTarget target) {
+                                                
         Map<String, Object> payload = new HashMap<>();
         payload.put("serviceName", target.getServiceName());
         payload.put("url", target.getUrl());
@@ -577,7 +800,7 @@ You can:
 This is cleaner than inventing a totally separate path just for service health.
 
 
-### 8.11 Scheduler that orchestrates collection
+### 11. Scheduler that orchestrates collection
 
 node-agent/src/../agent/service/NodeMonitoringScheduler.java
 
@@ -592,58 +815,82 @@ node-agent/src/../agent/service/NodeMonitoringScheduler.java
  *  - sends all of them to metrics-service
  *  
  * Design:
- * Each metric is sent independently.
+ *  - Each metric is sent independently.
  * 
  * Note:
  *  - fixedDelayString reads from Spring properties dynamically.
+ * 
+ * Lombok removes constructor boilerplate via @RequiredArgsConstructor.
  */
 
+package com.minte9.monitor.agent.service;
+
+import com.minte9.monitor.agent.client.MetricsHttpClient;
+import com.minte9.monitor.agent.collector.DockerMetricsCollector;
+import com.minte9.monitor.agent.collector.ServiceHealthCollector;
+import com.minte9.monitor.agent.collector.SystemMetricsCollector;
+import com.minte9.monitor.agent.config.NodeAgentProperties;
+import com.minte9.monitor.common.api.MetricIngestRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
+@RequiredArgsConstructor
 public class NodeMonitoringScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(NodeMonitoringScheduler.class);
 
     private final NodeAgentProperties properties;
-    private final SystemMetricsCollector systemMetricsCollector;
-    private final DockerMetricsCollector dockerMetricsCollector;
-    private final ServiceHealthCollector serviceHealthCollector;
-    private final MetricsServiceClient metricsServiceClient;
-
-    public NodeMonitoringScheduler(NodeAgentProperties properties,
-                                   SystemMetricsCollector systemMetricsCollector,
-                                   DockerMetricsCollector dockerMetricsCollector,
-                                   ServiceHealthCollector serviceHealthCollector,
-                                   MetricsServiceClient metricsServiceClient) {
-        this.properties = properties;
-        this.systemMetricsCollector = systemMetricsCollector;
-        this.dockerMetricsCollector = dockerMetricsCollector;
-        this.serviceHealthCollector = serviceHealthCollector;
-        this.metricsServiceClient = metricsServiceClient;
-    }
+    private final SystemMetricsCollector system;
+    private final DockerMetricsCollector docker;
+    private final ServiceHealthCollector service;
+    private final MetricsHttpClient httpClient;
 
     @Scheduled(fixedDelayString = "${monitor.agent.interval-ms:15000}")
     public void collectAndSendMetrics() {
-        String nodeId = properties.getNodeId();
+        
         List<MetricIngestRequest> metrics = new ArrayList<>();
 
         try {
-            metrics.addAll(systemMetricsCollector.collect(nodeId));
+            String nodeId = properties.getNodeId();
+            
+            // System collector
+            metrics.addAll(
+                system.collect(nodeId)
+            );
 
+            // Docker collector
             if (properties.isDockerEnabled()) {
-                metrics.addAll(dockerMetricsCollector.collect(nodeId));
+                metrics.addAll(
+                    docker.collect(nodeId)
+                );
             }
 
-            metrics.addAll(serviceHealthCollector.collect(nodeId));
+            // Service collector
+            metrics.addAll(
+                service.collect(nodeId)
+            );
 
+            // Metrics client
             for (MetricIngestRequest metric : metrics) {
                 try {
-                    metricsServiceClient.sendMetric(metric);
+                    httpClient.sendMetric(metric);
+
                 } catch (Exception e) {
-                    log.error("Failed to send metric type={} nodeId={} error={}",
-                            metric.metricType(), metric.nodeId(), e.getMessage());
+                    log.error("Failed to send metric type={} nodeId={} error={}", metric.metricType(), metric.nodeId(), e.getMessage());
                 }
             }
-
+            
             log.info("Collection cycle completed. nodeId={}, sentMetrics={}", nodeId, metrics.size());
 
         } catch (Exception e) {
@@ -658,7 +905,7 @@ Why send metrics one by one?
 Because metrics-service already has a clear POST /api/metrics endpoint.
 
 
-### 8.12 Node-agent application.yml
+### 12. Node-agent application.yml
 
 node-agent/src/main/resources/application.yml
 
@@ -702,7 +949,7 @@ Out of the box, node-agent will:
 Later in Docker Compose, you will change these URLs to container hostnames. 
 
 
-### 8.13 Manual test flow
+### 13. Manual test flow
 
 Start the services you already have.
 
@@ -880,7 +1127,7 @@ curl http://localhost:8081/api/metrics/node/vps-01
 ~~~
 
 
-### 8.14 Cleanup strategy
+### 14. Cleanup strategy
 
 `GET /api/metrics/node/vps-01`  
 is returning all stored metrics for that node, so once the agent runs for a while, that gets huge. 
@@ -911,7 +1158,7 @@ db.metrics.countDocuments()
 ~~~
 
 
-### 8.15 Separate service for node-agent
+### 15. Separate service for node-agent
 
 The `node-agent` is a bit special compared to the other services.  
 
@@ -936,7 +1183,7 @@ That is why many monitoring systems run agents:
 - or as daemon-like processes
 
 
-### 8.16 Run it directly (no Gradle)
+### 16. Run it directly (no Gradle)
 
 ~~~sh
 ./gradlew :node-agent:bootJar
@@ -998,7 +1245,7 @@ docker compose down
 
 
 
-### 8.17 Logs on VPS
+### 17. Logs on VPS
 
 On VPS (small disk 10-20 GB) logs can became a problem.  
 If limits are high or unset, disk can fill.  

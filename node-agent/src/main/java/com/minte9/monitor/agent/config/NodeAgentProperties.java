@@ -107,5 +107,4 @@ public class NodeAgentProperties {
             this.url = url;
         }
     }
-
 }
