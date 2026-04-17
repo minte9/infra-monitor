@@ -1,6 +1,4 @@
-# Infrastructure Monitor (VPS)
-
-## 8. Node agent
+## Node agent - Infra Monitor (VPS)
 
 The node-agent runs on VPS or laptop and does four jobs:
 
@@ -28,7 +26,7 @@ The flow:
       -> reads metrics + alerts for UI/API
 
 
-### 8.1 What node-agent sends
+### 1. What node-agent sends
 
 The node-agent sends the same MetricInjestRequest already created in common-api.  
 
@@ -121,7 +119,7 @@ Service health metric
 ~~~
 
 
-### 8.2 Shared MetricType
+### 2. Shared MetricType
 
 The shared enum should contains all types we need.
 
@@ -138,7 +136,7 @@ public enum MetricType {
 ~~~
 
 
-### 8.3 Gradle OSHI dependency
+### 3. Gradle OSHI dependency
 
 node-agent/build.gradle.kts
 
@@ -156,7 +154,7 @@ because it is easy to understand and works well on a VPS.
         ├── config/
         │   └── NodeAgentProperties.java
         ├── client/
-        │   └── MetricsServiceClient.java
+        │   └── MetricsHttpClient.java
         ├── collector/
         │   ├── SystemMetricsCollector.java
         │   ├── DockerMetricsCollector.java
