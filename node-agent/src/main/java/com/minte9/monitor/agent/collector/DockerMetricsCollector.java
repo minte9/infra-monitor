@@ -13,6 +13,7 @@ package com.minte9.monitor.agent.collector;
 import com.minte9.monitor.common.api.MetricIngestRequest;
 import com.minte9.monitor.common.api.MetricType;
 import org.springframework.stereotype.Component;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,10 @@ public class DockerMetricsCollector {
     
     private static final Logger log = LoggerFactory.getLogger(DockerMetricsCollector.class);
 
+    public DockerMetricsCollector() {
+    }
+
+    // Metrics collection (docker)
     public List<MetricIngestRequest> collect(String nodeId) {
         List<MetricIngestRequest> result = new ArrayList<>();
         Instant now = Instant.now();
@@ -41,8 +46,7 @@ public class DockerMetricsCollector {
         try {
             Process process = processBuilder.start();
 
-            try(BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
+            try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 
                 String line;
                 while((line = reader.readLine()) != null) {

@@ -720,6 +720,8 @@ sudo systemctl stop node-agent
 Run the agent with grale:
 
 ~~~sh
+./gradlew :node-agent:build
+
 ./gradlew :node-agent:bootRun
 ~~~
 

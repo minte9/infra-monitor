@@ -25,5 +25,9 @@ dependencies {
     // OSHI is a simple Java library for reading CPU, RAM, disk and other OS info.
     implementation("com.github.oshi:oshi-core:6.6.1")
 
+    // Lombok removes constructor boilerplate via @RequiredArgsConstructor.
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

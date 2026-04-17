@@ -19,9 +19,9 @@ import com.minte9.monitor.agent.config.NodeAgentProperties;
 @SpringBootApplication
 @EnableScheduling
 @EnableConfigurationProperties(NodeAgentProperties.class)
-public class NodeAgentServiceApplication {
+public class NodeAgentApplication {
     public static void main(String[] args) {
-        SpringApplication.run(NodeAgentServiceApplication.class, args);
+        SpringApplication.run(NodeAgentApplication.class, args);
     }
     
 }

@@ -11,8 +11,10 @@ package com.minte9.monitor.agent.collector;
 import com.minte9.monitor.agent.config.NodeAgentProperties;
 import com.minte9.monitor.common.api.MetricIngestRequest;
 import com.minte9.monitor.common.api.MetricType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -25,21 +27,23 @@ import java.util.Map;
 
 @Component
 public class ServiceHealthCollector {
-
+    
+    private final RestClient restClient;
+    private final NodeAgentProperties properties;
     private static final Logger log = LoggerFactory.getLogger(ServiceHealthCollector.class);
 
-    private final NodeAgentProperties properties;
-    private final RestClient restClient;
-
+    // Constructor
     public ServiceHealthCollector(NodeAgentProperties properties) {
         this.properties = properties;
         this.restClient = RestClient.builder().build();
     }
 
+    // Metrics collection (service)
     public List<MetricIngestRequest> collect(String nodeId) {
         List<MetricIngestRequest> metrics = new ArrayList<>();
         Instant now = Instant.now();
 
+        // Check every target (UP)
         for (NodeAgentProperties.HealthTarget target : properties.getHealthTargets()) {
             metrics.add(checkTarget(nodeId, now, target));
         }
@@ -47,8 +51,9 @@ public class ServiceHealthCollector {
         return metrics;
     }
 
-    private MetricIngestRequest checkTarget(String nodeId, Instant timestamp,
-                                            NodeAgentProperties.HealthTarget target) {
+    // Check target (UP)
+    private MetricIngestRequest checkTarget(
+            String nodeId, Instant timestamp, NodeAgentProperties.HealthTarget target) {
                                                 
         Map<String, Object> payload = new HashMap<>();
         payload.put("serviceName", target.getServiceName());

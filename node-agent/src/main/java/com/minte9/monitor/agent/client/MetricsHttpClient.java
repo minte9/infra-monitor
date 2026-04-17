@@ -18,18 +18,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-public class MetricsServiceClient {
-
-    private static final Logger log = LoggerFactory.getLogger(MetricsServiceClient.class);
+public class MetricsHttpClient {
 
     private final RestClient restClient;
-
-    public MetricsServiceClient(NodeAgentProperties properties) {
-       this.restClient = RestClient.builder()
+    private static final Logger log = LoggerFactory.getLogger(MetricsHttpClient.class);
+    
+    // Constructor
+    public MetricsHttpClient(NodeAgentProperties properties) {
+       this.restClient = RestClient
+                .builder()
                 .baseUrl(properties.getMetricsServiceBaseUrl())
                 .build();
     }
 
+    // Post metric
     public void sendMetric(MetricIngestRequest request) {
         restClient.post()
                   .uri("/api/metrics")
@@ -38,7 +40,6 @@ public class MetricsServiceClient {
                   .retrieve()
                   .toBodilessEntity();
         
-        log.info("Metric send successfully: nodeId={}, metricType={}",
-                request.nodeId(), request.metricType());
+        log.info("Metric send successfully: nodeId={}, metricType={}", request.nodeId(), request.metricType());
     }
 }

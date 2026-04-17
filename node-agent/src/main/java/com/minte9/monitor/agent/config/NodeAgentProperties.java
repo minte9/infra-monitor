@@ -37,6 +37,7 @@ public class NodeAgentProperties {
     @NotEmpty
     private List<HealthTarget> healthTargets = new ArrayList<>();
 
+    // NodeId
     public String getNodeId() {
         return nodeId;
     }
@@ -45,6 +46,7 @@ public class NodeAgentProperties {
         this.nodeId = nodeId;
     }
 
+    // Metrics BaseUrl
     public String getMetricsServiceBaseUrl() {
         return metricsServiceBaseUrl;
     }
@@ -53,6 +55,7 @@ public class NodeAgentProperties {
         this.metricsServiceBaseUrl = metricsServiceBaseUrl;
     }
 
+    // Interval
     public long getIntervalMs() {
         return intervalMs;
     }
@@ -61,6 +64,7 @@ public class NodeAgentProperties {
         this.intervalMs = intervalMs;
     }
 
+    // Docker Enabled
     public boolean isDockerEnabled() {
         return dockerEnabled;
     }
@@ -69,6 +73,7 @@ public class NodeAgentProperties {
         this.dockerEnabled = dockerEnabled;
     }
 
+    // Health Targets
     public List<HealthTarget> getHealthTargets() {
         return healthTargets;
     }
@@ -77,6 +82,7 @@ public class NodeAgentProperties {
         this.healthTargets = healthTargets;
     }
 
+    // Target class
     public static class HealthTarget {
         
         @NotBlank
