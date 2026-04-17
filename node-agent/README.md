@@ -135,6 +135,14 @@ The shared enum should contains all types we need.
 common-api/src/../common/api/MetricType.java
 
 ~~~java
+/**
+ * These metric types are shared across modules.
+ * Keep this enum in common-api so node-agent and metrics-service
+ * speak the same language.
+ */
+
+package com.minte9.monitor.common.api;
+
 public enum MetricType {
     CPU,
     RAM,
