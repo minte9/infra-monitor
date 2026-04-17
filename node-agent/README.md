@@ -1,6 +1,6 @@
 # Infrastructure Monitor (VPS)
 
-## Node agent
+## 8. Node agent
 
 The node-agent runs on VPS or laptop and does four jobs:
 
