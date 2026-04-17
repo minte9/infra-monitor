@@ -33,6 +33,15 @@ The node-agent sends the same MetricInjestRequest already created in common-api.
 common-api/src/../common/api/MetricIngestRequest.java
 
 ~~~java
+package com.minte9.monitor.common.api;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+
+import java.time.Instant;
+import java.util.Map;
+
 public record MetricIngestRequest(
         @NotBlank String nodeId,
         @NotNull MetricType metricType,
@@ -146,7 +155,7 @@ For Docker container status, we will use the Docker CLI for the first version,
 because it is easy to understand and works well on a VPS.  
 
 
-### 8.4 Package structure
+### 4. Package structure
 
     node-agent/
     └── src/main/java/com/minte9/monitor/agent/
@@ -163,19 +172,14 @@ because it is easy to understand and works well on a VPS.
             └── NodeMonitoringScheduler.java
 
 
-### 8.5 Main application class
+### 5. Main application class
 
-node-agent/src/../agent/NodeAgentApplication.java
+This is the Spring Boot entry point for node-agent.  
+
+@EnableScheduling turns on scheduled metric collection.  
+@@EnableConfigurationProperties lets us bind application.yml into a typed Java properties class.
 
 ~~~java
-/**
- * This is the Spring Boot entry point for node-agent.
- * 
- * Important:
- *  - @EnableScheduling turns on scheduled metric collection
- *  - @@EnableConfigurationProperties lets us bind application.yml into a typed Java properties class 
- */
-
 @SpringBootApplication
 @EnableScheduling
 @EnableConfigurationProperties(NodeAgentProperties.class)
@@ -183,17 +187,35 @@ public class NodeAgentServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(NodeAgentServiceApplication.class, args);
     }
-    
 }
 ~~~
 
 
-### 8.6 Configuration properties
+### 6. Configuration properties Class
 
 This class maps node-agent settings from application.yml
 
-node-agent/src/../config/NodeAgentProperties.java
 node-agent/src/main/resources/application.yml
+
+~~~yml
+...
+
+monitor:
+  agent:
+    node-id: vps-01
+    metrics-service-base-url: http://localhost:8081
+    interval-ms: 15000
+    docker-enabled: true
+    health-targets:
+      - service-name: metrics-service
+        url: http://localhost:8081/actuator/health
+      - service-name: alert-service
+        url: http://localhost:8082/actuator/health
+      - service-name: dashboard-service
+        url: http://localhost:8083/actuator/health
+~~~
+
+node-agent/src/../config/NodeAgentProperties.java
 
 ~~~java
 /** 
@@ -222,23 +244,6 @@ public class NodeAgentProperties {
 
 }
 ~~~
-~~~yml
-...
-
-monitor:
-  agent:
-    node-id: vps-01
-    metrics-service-base-url: http://localhost:8081
-    interval-ms: 15000
-    docker-enabled: true
-    health-targets:
-      - service-name: metrics-service
-        url: http://localhost:8081/actuator/health
-      - service-name: alert-service
-        url: http://localhost:8082/actuator/health
-      - service-name: dashboard-service
-        url: http://localhost:8083/actuator/health
-~~~
 
 Why use typed properties?
 
@@ -260,7 +265,7 @@ public MetricsServiceClient(NodeAgentProperties properties) {
 ~~~
 
 
-### 8.7 HTTP client to send metrics
+### 7. HTTP client to send metrics
 
 node-agent/src/../agent/client/MetricsServiceClient.java
 
@@ -306,7 +311,7 @@ Why RestClient?
 Spring Boot 3.x gives you a modern HTTP client API.
 
 
-### 8.8 System metrics collector
+### 8. System metrics collector
 
 node-agent/src/../agent/collector/SystemMetricsCollector.java
 
@@ -377,7 +382,7 @@ OSHI calculates it beween two snapshots of CPU ticks.
 This is why we store `long[] previousCpuTicks`.
 
 
-### 8.9 Docker metrics collector
+### 9. Docker metrics collector
 
 The simplest practical solution is to call:
 
@@ -472,7 +477,7 @@ For example:
 We still want CPU, RAM, disk, and service health metrics to keep flowing.  
 
 
-### 8.10 Service health collector
+### 10. Service health collector
 
 node-agent/src/../agent/collector/ServiceHealthCollector.java
 
