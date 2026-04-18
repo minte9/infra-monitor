@@ -24,6 +24,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 @Component
 public class AlertHandlers {
     
@@ -31,6 +34,10 @@ public class AlertHandlers {
 
     private final RabbitTemplate rabbit;
     private final List<AlertRecord> storage = new CopyOnWriteArrayList<>();
+
+    private static final DateTimeFormatter ALERT_TIME_FORMAT =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.of("Europe/Bucharest"));
 
     public AlertHandlers(RabbitTemplate rabbit) {
         this.rabbit = rabbit;
@@ -254,7 +261,7 @@ public class AlertHandlers {
     }
 
     public static String withTime(Instant timestamp, String message) {
-        return message + " / " + timestamp;
+        return message + " / " + ALERT_TIME_FORMAT.format(timestamp);
     }
 
     // ============================
