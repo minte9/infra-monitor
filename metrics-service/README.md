@@ -245,7 +245,8 @@ public class MetricsController {
         MetricRecord record = metrics
                 .findFirstByNodeIdAndMetricTypeOrderByTimestampDesc(nodeId, metricType)
                 .orElseThrow(() -> 
-                    new MetricNotFoundException("No metrics found for node " + nodeId + " and type " + metricType));
+                    new MetricNotFoundException(
+                        "No metrics found for node " + nodeId + " and type " + metricType));
         return toResponse(record);
     }
 
@@ -458,8 +459,18 @@ curl -X POST http://localhost:8081/api/metrics \
       "systemLoad": 1.82
     }
   }'
-  
-{"id":"5befcab2-c1e5-4fc7-a48a-5572d5e47075","nodeId":"vps-01","metricType":"CPU","timestamp":"2026-03-28T10:15:30Z","payload":{"usagePercent":67.4,"systemLoad":1.82},"receiveAt":"2026-03-29T10:20:56.607948998Z"}
+
+{
+  "id": "5befcab2-c1e5-4fc7-a48a-5572d5e47075",
+  "nodeId": "vps-01",
+  "metricType": "CPU",
+  "timestamp": "2026-03-28T10:15:30Z",
+  "payload": {
+    "usagePercent": 67.4,
+    "systemLoad": 1.82
+  },
+  "receiveAt": "2026-03-29T10:20:56.607948998Z"
+}
 ~~~
 
 Container metric
@@ -478,8 +489,18 @@ curl -X POST http://localhost:8081/api/metrics \
     }
   }'
 
-{"id":"b3391590-6275-4fbf-b283-117341ae5438","nodeId":"vps-01","metricType":"CONTAINER","timestamp":"2026-03-28T10:16:20Z",
-  "payload":{"containerName":"rabbitmq","status":"UP","image":"rabbitmq:3-management"},"receiveAt":"2026-03-29T10:23:42.920761590Z"}
+{
+  "id": "b3391590-6275-4fbf-b283-117341ae5438",
+  "nodeId": "vps-01",
+  "metricType": "CONTAINER",
+  "timestamp": "2026-03-28T10:16:20Z",
+  "payload": {
+    "containerName": "rabbitmq",
+    "status": "UP",
+    "image": "rabbitmq:3-management"
+  },
+  "receiveAt": "2026-03-29T10:23:42.920761590Z"
+}
 ~~~
 
 All metrics
@@ -487,10 +508,31 @@ All metrics
 ~~~sh
 curl http://localhost:8081/api/metrics
 
-[{"id":"5befcab2-c1e5-4fc7-a48a-5572d5e47075","nodeId":"vps-01","metricType":"CPU","timestamp":"2026-03-28T10:15:30Z",
-    "payload":{"usagePercent":67.4,"systemLoad":1.82},"receiveAt":"2026-03-29T10:20:56.607948998Z"},
- {"id":"b3391590-6275-4fbf-b283-117341ae5438","nodeId":"vps-01","metricType":"CONTAINER","timestamp":"2026-03-28T10:16:20Z",
-    "payload":{"containerName":"rabbitmq","status":"UP","image":"rabbitmq:3-management"},"receiveAt":"2026-03-29T10:23:42.920761590Z"}]
+[
+  {
+    "id": "5befcab2-c1e5-4fc7-a48a-5572d5e47075",
+    "nodeId": "vps-01",
+    "metricType": "CPU",
+    "timestamp": "2026-03-28T10:15:30Z",
+    "payload": {
+      "usagePercent": 67.4,
+      "systemLoad": 1.82
+    },
+    "receiveAt": "2026-03-29T10:20:56.607948998Z"
+  },
+  {
+    "id": "b3391590-6275-4fbf-b283-117341ae5438",
+    "nodeId": "vps-01",
+    "metricType": "CONTAINER",
+    "timestamp": "2026-03-28T10:16:20Z",
+    "payload": {
+      "containerName": "rabbitmq",
+      "status": "UP",
+      "image": "rabbitmq:3-management"
+    },
+    "receiveAt": "2026-03-29T10:23:42.920761590Z"
+  }
+]
 ~~~
 
 By node
@@ -498,10 +540,31 @@ By node
 ~~~sh
 curl http://localhost:8081/api/metrics/node/vps-01
 
-[{"id":"5befcab2-c1e5-4fc7-a48a-5572d5e47075","nodeId":"vps-01","metricType":"CPU","timestamp":"2026-03-28T10:15:30Z",
-    "payload":{"usagePercent":67.4,"systemLoad":1.82},"receiveAt":"2026-03-29T10:20:56.607948998Z"},
- {"id":"b3391590-6275-4fbf-b283-117341ae5438","nodeId":"vps-01","metricType":"CONTAINER","timestamp":"2026-03-28T10:16:20Z",
-    "payload":{"containerName":"rabbitmq","status":"UP","image":"rabbitmq:3-management"},"receiveAt":"2026-03-29T10:23:42.920761590Z"}]
+[
+  {
+    "id": "5befcab2-c1e5-4fc7-a48a-5572d5e47075",
+    "nodeId": "vps-01",
+    "metricType": "CPU",
+    "timestamp": "2026-03-28T10:15:30Z",
+    "payload": {
+      "usagePercent": 67.4,
+      "systemLoad": 1.82
+    },
+    "receiveAt": "2026-03-29T10:20:56.607948998Z"
+  },
+  {
+    "id": "b3391590-6275-4fbf-b283-117341ae5438",
+    "nodeId": "vps-01",
+    "metricType": "CONTAINER",
+    "timestamp": "2026-03-28T10:16:20Z",
+    "payload": {
+      "containerName": "rabbitmq",
+      "status": "UP",
+      "image": "rabbitmq:3-management"
+    },
+    "receiveAt": "2026-03-29T10:23:42.920761590Z"
+  }
+]
 ~~~
 
 Health
