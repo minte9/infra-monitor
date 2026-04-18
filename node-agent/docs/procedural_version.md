@@ -1,4 +1,6 @@
-### Single-file procedural node-agent
+### Node Agent
+
+Single-file procedural version.
 
 ~~~java
 package com.minte9.monitor.agent;

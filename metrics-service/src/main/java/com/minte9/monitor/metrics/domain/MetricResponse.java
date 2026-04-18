@@ -4,7 +4,7 @@
  * We should not expose internal storage objects
  * directly from the controller.
  */
-package com.minte9.monitor.metrics.api;
+package com.minte9.monitor.metrics.domain;
 
 import java.time.Instant;
 import java.util.Map;

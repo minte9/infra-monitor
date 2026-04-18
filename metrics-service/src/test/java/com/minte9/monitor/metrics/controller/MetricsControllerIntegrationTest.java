@@ -29,8 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MetricsControllerIntegrationTest {
 
     // Start a MongoDB Testcontainer for the duration of the tests
-        @Container
-        static final MongoDBContainer mongo = new MongoDBContainer("mongo:7");
+    @Container
+    static final MongoDBContainer mongo = new MongoDBContainer("mongo:7");
 
     @DynamicPropertySource
     static void mongoProperties(DynamicPropertyRegistry registry) {

@@ -13,16 +13,17 @@
  */
 package com.minte9.monitor.metrics.repository;
 
+import com.minte9.monitor.common.api.MetricType;
+import com.minte9.monitor.metrics.domain.MetricRecord;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-
-import com.minte9.monitor.common.api.MetricType;
-import com.minte9.monitor.metrics.domain.MetricRecord;
-
 public interface MetricMongoRepository extends MongoRepository<MetricRecord, String> {
+
     List<MetricRecord> findByNodeId(String nodeId);
     List<MetricRecord> findByNodeIdAndMetricType(String nodeId, MetricType metricType);
     List<MetricRecord> findByTimestampAfter(Instant timestamp);
