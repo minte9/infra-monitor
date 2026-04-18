@@ -5,7 +5,7 @@
  * is a good habit because API contracts often evolve independently.
  */
 
-package com.minte9.monitor.alert.api;
+package com.minte9.monitor.alert.domain;
 
 import java.time.Instant;
 import java.util.Map;
