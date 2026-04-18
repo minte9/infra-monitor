@@ -13,7 +13,7 @@ It is the first microservice in the monitoring flow:
                                         -> Dashboard Service
 
 
-### Role
+### 1. Role
 
 The service role is: 
 
@@ -23,7 +23,7 @@ The service role is:
 - expose query endpoints for stored metrics
 
 
-### Responsibilities
+### 2. Responsibilities
 
 The services handles:
 
@@ -39,7 +39,7 @@ It does `not` render UI.
 Those responsibilities belong to other services.
 
 
-### Metric Types
+### 3. Metric Types
 
 These metric types are defined in the shared common module.
 
@@ -55,7 +55,7 @@ public enum MetricType {
 ~~~
 
 
-### Project Structure
+### 4. Project Structure
 
     metrics-service
     ├── src/main/java/com/minte9/monitor/metrics
@@ -78,7 +78,7 @@ public enum MetricType {
     └── README.md
 
 
-### Service Application
+### 5. Service Application
 
 This is the Spring Boot entry point.  
 It starts the application and enables component scanning for the microservices.  
@@ -95,7 +95,8 @@ public class MetricsServiceApplication {
 }
 ~~~
 
-### RabbitMQ Config
+
+### 6. RabbitMQ Config
 
 This class defines the RabbitMQ messaging configuration used by the service.
 
@@ -143,7 +144,8 @@ public class RabbitMqConfig {
 }
 ~~~
 
-### Rest Controller
+
+### 7. Rest Controller
 
 This is the REST API layer.  
 It exposes HTTP endpoints:  
@@ -264,7 +266,7 @@ public class MetricsController {
 }
 ~~~
 
-### Exceptions
+### 8. Exceptions
 
 controller/MetricNotFoundException.java
 
@@ -325,7 +327,7 @@ public class GlobalExceptionHandler {
 ~~~
 
 
-### Domain Models
+### 9. Domain Models
 
 domain/MetricRecord.java
 
@@ -369,7 +371,7 @@ It provides database access for metric records.
 The repository removes the need to write manual MongoDB queries for simple cases.  
 
 
-### Request Flow
+### 10. Request Flow
 
 When a node-agent sends a metric:
 
@@ -385,7 +387,7 @@ This makes the service both:
 - an event producer
 
 
-### Data Storage
+### 11. Data Storage
 
 Metrics are stored in MongoDB because they are:
 
@@ -402,7 +404,7 @@ Examples:
 - CONTAINER metric may contain container name and status
 
 
-### Messaging
+### 12. Messaging
 
 After a metric is saved, the service publishes an event to RabbitMQ.
 
@@ -416,7 +418,7 @@ For example:
 This keeps the architecture event-driven.
 
 
-### Running the Service
+### 13. Running the Service
 
 
 Run with Gradle:
@@ -429,7 +431,7 @@ curl http://localhost:8081/api/metrics
 ~~~
 
 
-### Testing
+### 14. Testing
 
 Integration tests verify:
 
@@ -441,7 +443,7 @@ Integration tests verify:
 RabbitMQ publishing can be mocked in tests so the service can be tested without a running broker.
 
 
-### REST API
+### 15. REST API
 
 Example requests:
 
