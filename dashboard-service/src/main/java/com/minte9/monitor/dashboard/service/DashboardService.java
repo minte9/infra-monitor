@@ -16,18 +16,18 @@ import com.minte9.monitor.dashboard.domain.ContainerStatusView;
 import com.minte9.monitor.dashboard.domain.ServiceHealthView;
 import com.minte9.monitor.dashboard.domain.ContainerStatusView;
 import com.minte9.monitor.dashboard.domain.ServiceHealthView;
-import com.minte9.monitor.dashboard.projection.DashboardProjectionRepository;
+import com.minte9.monitor.dashboard.repository.DashboardRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
 @Service
-public class DashboardProjectionService {
+public class DashboardService {
     
-    private final DashboardProjectionRepository repository;
+    private final DashboardRepository repository;
 
-    public DashboardProjectionService(DashboardProjectionRepository repository) {
+    public DashboardService(DashboardRepository repository) {
         this.repository = repository;
     }
 

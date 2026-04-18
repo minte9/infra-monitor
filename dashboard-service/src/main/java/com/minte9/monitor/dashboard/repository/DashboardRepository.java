@@ -6,7 +6,7 @@
  * use thread-safe structures.
  */
 
-package com.minte9.monitor.dashboard.projection;
+package com.minte9.monitor.dashboard.repository;
 
 import com.minte9.monitor.dashboard.domain.AlertView;
 import com.minte9.monitor.dashboard.domain.MetricView;
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class DashboardProjectionRepository {
+public class DashboardRepository {
     
     private final Map<String, Map<String, MetricView>> latestMetricsByNode = new ConcurrentHashMap<>();
     private final Map<String, List<AlertView>> alertsByNode = new ConcurrentHashMap<>();
@@ -31,7 +31,6 @@ public class DashboardProjectionRepository {
     private final Map<String, Map<String, ContainerStatusView>> latestContainersByNode = new ConcurrentHashMap<>();
     private final Map<String, Map<String, ServiceHealthView>> latestServicesByNode = new ConcurrentHashMap<>();
     
-
     public void updateMetric(String nodeId, MetricView metricView) {
         latestMetricsByNode
             .computeIfAbsent(nodeId, ignored -> new ConcurrentHashMap<>())

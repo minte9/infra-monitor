@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 
 import com.minte9.monitor.common.events.MetricReceivedEvent;
 import com.minte9.monitor.dashboard.config.RabbitMqConfig;
-import com.minte9.monitor.dashboard.service.DashboardProjectionService;
+import com.minte9.monitor.dashboard.service.DashboardService;
 
 @Component
 public class MetricEventListener {
     
-    private final DashboardProjectionService service;
+    private final DashboardService service;
 
-    public MetricEventListener(DashboardProjectionService service) {
+    public MetricEventListener(DashboardService service) {
         this.service = service;
     }
 

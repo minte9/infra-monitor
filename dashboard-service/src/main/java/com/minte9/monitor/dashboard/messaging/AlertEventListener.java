@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 
 import com.minte9.monitor.common.events.AlertTriggeredEvent;
 import com.minte9.monitor.dashboard.config.RabbitMqConfig;
-import com.minte9.monitor.dashboard.service.DashboardProjectionService;
+import com.minte9.monitor.dashboard.service.DashboardService;
 
 @Component
 public class AlertEventListener {
  
-    private final DashboardProjectionService service;
+    private final DashboardService service;
 
-    public AlertEventListener(DashboardProjectionService service) {
+    public AlertEventListener(DashboardService service) {
         this.service = service;
     }
     

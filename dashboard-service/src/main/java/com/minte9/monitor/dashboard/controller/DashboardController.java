@@ -17,7 +17,7 @@ import com.minte9.monitor.dashboard.domain.MetricView;
 import com.minte9.monitor.dashboard.domain.NodeDashboardView;
 import com.minte9.monitor.dashboard.domain.ContainerStatusView;
 import com.minte9.monitor.dashboard.domain.ServiceHealthView;
-import com.minte9.monitor.dashboard.service.DashboardProjectionService;
+import com.minte9.monitor.dashboard.service.DashboardService;
 
 import java.util.List;
 import java.util.Map;
@@ -26,9 +26,9 @@ import java.util.Map;
 @RequestMapping("/api/dashboard")
 public class DashboardController {
     
-    private final DashboardProjectionService service;
+    private final DashboardService service;
 
-    public DashboardController(DashboardProjectionService service) {
+    public DashboardController(DashboardService service) {
         this.service = service;
     }
 
@@ -51,8 +51,6 @@ public class DashboardController {
     public List<AlertView> findAlertsByNode(@PathVariable String nodeId) {
         return service.findAlertsByNode(nodeId);
     }
-
-    // Containers & Services
 
     @GetMapping("/nodes/{nodeId}/containers")
     public List<ContainerStatusView> findContainersByNode(@PathVariable String nodeId) {

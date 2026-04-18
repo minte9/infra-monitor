@@ -1,3 +1,8 @@
+### Dashboard Service
+
+Single-file procedural version.
+
+~~~java
 package com.minte9.monitor.allinone;
 
 import org.springframework.boot.SpringApplication;
@@ -741,3 +746,4 @@ public class InfraMonitorApplication {
         return Map.of("ok", true, "service", serviceName, "status", status);
     }
 }
+~~~
