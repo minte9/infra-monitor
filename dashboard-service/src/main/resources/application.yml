@@ -1,5 +1,9 @@
 server:
   port: 8083
+  servlet:
+    session:
+      cookie:
+        name: MONITORSESSION
 
 spring:
   application:
